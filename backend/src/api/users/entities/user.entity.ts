@@ -11,5 +11,5 @@ export class UserEntity implements User {
   email: string;
 
   @Exclude()
-  password_hash: string;
+  passwordHash: string;
 }

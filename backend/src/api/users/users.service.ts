@@ -1,8 +1,8 @@
-import { Injectable } from "@nestjs/common";
-import { DatabaseService } from "src/config/database/database.service";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UserEntity } from "./entities/user.entity";
 import * as bcrypt from "bcrypt";
+import { DatabaseService } from "../../config/database/database.service";
 
 @Injectable()
 export class UsersService {
@@ -20,6 +20,18 @@ export class UsersService {
         passwordHash,
       },
     });
+
+    return new UserEntity(user);
+  }
+
+  async findOne(id: number): Promise<UserEntity> {
+    const user = await this.db.user.findUnique({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new NotFoundException("user not found");
+    }
 
     return new UserEntity(user);
   }
