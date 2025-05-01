@@ -63,6 +63,18 @@ describe("AppController (e2e)", () => {
       }
     });
 
+    it("should return 400 BAD REQUEST if password and confirmPassword doesn't match", async () => {
+      const { body, statusCode } = await request(api)
+        .post("/users")
+        .send({
+          ...createrUserDto,
+          confirmPassword: "1234567890",
+        });
+
+      expect(statusCode).toBe(400);
+      expect(body.message).toContain("password and confirmPassword doesn't match");
+    });
+
     it("should get 409 CONFLICT if user already exists", async () => {
       await request(api).post("/users").send(createrUserDto);
       const { body, statusCode } = await request(api).post("/users").send(createrUserDto);

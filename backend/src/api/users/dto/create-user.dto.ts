@@ -13,6 +13,6 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty()
-  @Match("password")
+  @Match("password",{message: "password and confirmPassword doesn't match"})
   confirmPassword: string;
 }
