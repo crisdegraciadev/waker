@@ -5,7 +5,7 @@ import { PaginationService } from "~/shared/pagination.service";
 import { CreateExerciseDto } from "./dtos/create-exercise.dto";
 import { UpdateExerciseDto } from "./dtos/update-exercise.dto";
 import { ExerciseEntity } from "./entities/exercise.entity";
-import { Page } from "~/components/entities/page.entity";
+import { PageEntity } from "~/components/entities/page.entity";
 import { Exercise } from "@prisma/client";
 
 @Injectable()
@@ -23,15 +23,15 @@ export class ExercisesService {
     return new ExerciseEntity(exercise);
   }
 
-  async findAll({ pageNumber = 1, limit = 10 }: PaginationDto, userId: number) {
-    const { items, pageable } = await this.paginationService.paginate<Exercise>({
+  async findAll({ pageNumber, limit }: PaginationDto, userId: number) {
+    const { items, pageable } = await this.paginationService.paginate<Exercise, "Exercise">({
       modelName: "Exercise",
       pageNumber,
       limit,
       where: { userId },
     });
 
-    const page = new Page({
+    const page = new PageEntity({
       data: items.map((e) => new ExerciseEntity(e)),
       pageable,
     });
