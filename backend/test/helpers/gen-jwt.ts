@@ -1,19 +1,14 @@
 import * as request from "supertest";
 import { App } from "supertest/types";
-import { AuthEntity } from "~/api/auth/entity/auth.entity";
+import { AuthEntity } from "~/api/auth/entities/auth.entity";
+import { CreateUserDto } from "~/api/users/dtos/create-user.dto";
 
-export default async function genJwt(api: App): Promise<string> {
-  const userDto = {
-    email: "test@email.com",
-    password: "123456789",
-    confirmPassword: "123456789",
-  };
-
-  await request(api).post("/users").send(userDto);
+export default async function generateJwt(api: App, dto: CreateUserDto) {
+  await request(api).post("/users").send(dto);
 
   const { body } = await request(api).post("/auth/login").send({
-    email: userDto.email,
-    password: userDto.password,
+    email: dto.email,
+    password: dto.password,
   });
 
   const { accessToken }: AuthEntity = body;

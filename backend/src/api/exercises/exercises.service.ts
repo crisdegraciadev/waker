@@ -1,19 +1,54 @@
-import { Injectable } from '@nestjs/common';
-import { CreateExerciseDto } from './dto/create-exercise.dto';
-import { UpdateExerciseDto } from './dto/update-exercise.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { PaginationDto } from "~/components/dtos/pagination.dto";
+import { DatabaseService } from "~/shared/database.service";
+import { PaginationService } from "~/shared/pagination.service";
+import { CreateExerciseDto } from "./dtos/create-exercise.dto";
+import { UpdateExerciseDto } from "./dtos/update-exercise.dto";
+import { ExerciseEntity } from "./entities/exercise.entity";
+import { Page } from "~/components/entities/page.entity";
+import { Exercise } from "@prisma/client";
 
 @Injectable()
 export class ExercisesService {
-  create(createExerciseDto: CreateExerciseDto) {
-    return 'This action adds a new exercise';
+  constructor(
+    private db: DatabaseService,
+    private paginationService: PaginationService,
+  ) { }
+
+  async create(createExerciseDto: CreateExerciseDto, userId: number) {
+    const exercise = await this.db.exercise.create({
+      data: { ...createExerciseDto, userId },
+    });
+
+    return new ExerciseEntity(exercise);
   }
 
-  findAll() {
-    return `This action returns all exercises`;
+  async findAll({ pageNumber = 1, limit = 10 }: PaginationDto, userId: number) {
+    const { items, pageable } = await this.paginationService.paginate<Exercise>({
+      modelName: "Exercise",
+      pageNumber,
+      limit,
+      where: { userId },
+    });
+
+    const page = new Page({
+      data: items.map((e) => new ExerciseEntity(e)),
+      pageable,
+    });
+
+    return page;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} exercise`;
+  async findOne(id: number, userId: number) {
+    const exercise = await this.db.exercise.findUnique({
+      where: { id, userId },
+    });
+
+    if (!exercise) {
+      throw new NotFoundException("exercise not found");
+    }
+
+    return new ExerciseEntity(exercise);
   }
 
   update(id: number, updateExerciseDto: UpdateExerciseDto) {

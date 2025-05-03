@@ -14,12 +14,17 @@ const ERROR_CATALOG: Record<string, ErrorResponse> = {
     statusCode: HttpStatus.CONFLICT,
     message: "resource already exists",
   },
+  P2003: {
+    statusCode: HttpStatus.NOT_FOUND,
+    message: "failed to found linked resource",
+  },
 };
 
 @Catch(Prisma.PrismaClientKnownRequestError)
 export class PrismaClientExceptionFilter extends BaseExceptionFilter {
   catch(exception: Prisma.PrismaClientKnownRequestError, host: ArgumentsHost) {
     console.error(exception.message);
+    console.error(`Error code: ${exception.code}`);
 
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();

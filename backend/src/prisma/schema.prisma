@@ -22,11 +22,13 @@ model User {
 
 model Exercise {
   id         Int                @id @default(autoincrement())
-  name       String             @unique
+  name       String
   difficulty ExerciseDifficulty @default(MEDIUM)
   type       ExerciseType       @default(WEIGHT)
   user       User               @relation(fields: [userId], references: [id])
   userId     Int
+
+  @@unique([userId, name], name: "exerciseIdentifier")
 }
 
 enum ExerciseDifficulty {

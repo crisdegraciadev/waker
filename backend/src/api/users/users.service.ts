@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { CreateUserDto } from "./dto/create-user.dto";
+import { CreateUserDto } from "./dtos/create-user.dto";
 import { UserEntity } from "./entities/user.entity";
 import * as bcrypt from "bcrypt";
-import { DatabaseService } from "../../config/database/database.service";
+import { DatabaseService } from "../../shared/database.service";
 
 @Injectable()
 export class UsersService {

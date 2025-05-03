@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { AuthEntity } from "./entity/auth.entity";
+import { AuthEntity } from "./entities/auth.entity";
 import * as bcrypt from "bcrypt";
-import { LoginDto } from "./dto/login.dto";
-import { DatabaseService } from "../../config/database/database.service";
+import { LoginDto } from "./dtos/login.dto";
+import { DatabaseService } from "../../shared/database.service";
 
 @Injectable()
 export class AuthService {
