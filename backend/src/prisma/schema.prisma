@@ -14,7 +14,30 @@ datasource db {
 }
 
 model User {
-  id           Int    @id @default(autoincrement())
-  email        String @unique
+  id           Int        @id @default(autoincrement())
+  email        String     @unique
   passwordHash String
+  exercises    Exercise[]
+}
+
+model Exercise {
+  id         Int                @id @default(autoincrement())
+  name       String             @unique
+  difficulty ExerciseDifficulty @default(MEDIUM)
+  type       ExerciseType       @default(WEIGHT)
+  user       User               @relation(fields: [userId], references: [id])
+  userId     Int
+}
+
+enum ExerciseDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum ExerciseType {
+  BODY_WEIGHT
+  WEIGHT
+  STRETCH
+  MOBILITY
 }
