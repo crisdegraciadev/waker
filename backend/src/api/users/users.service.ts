@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateUserDto } from "./dtos/create-user.dto";
 import { UserEntity } from "./entities/user.entity";
 import * as bcrypt from "bcrypt";
@@ -10,6 +10,14 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto): Promise<UserEntity> {
     const { email, password } = createUserDto;
+
+    const isEmailInUse = await this.db.user.findUnique({
+      where: { email },
+    });
+
+    if (isEmailInUse) {
+      throw new ConflictException("email already in use");
+    }
 
     const roundsOfHashing = 10;
     const passwordHash = await bcrypt.hash(password, roundsOfHashing);

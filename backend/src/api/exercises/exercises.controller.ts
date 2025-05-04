@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards, Query } from "@nestjs/common";
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards, Query, HttpCode } from "@nestjs/common";
 import { ExercisesService } from "./exercises.service";
 import { CreateExerciseDto } from "./dtos/create-exercise.dto";
 import { UpdateExerciseDto } from "./dtos/update-exercise.dto";
@@ -24,7 +24,7 @@ export class ExercisesController {
     @Query() paginationDto: PaginationDto,
     @Query() filterDto: FilterExerciseDto,
     @Query() sortDto: SortExerciseDto,
-    @GetUser("id") userId: number
+    @GetUser("id") userId: number,
   ) {
     return this.exercisesService.findAll(paginationDto, filterDto, sortDto, userId);
   }
@@ -37,13 +37,14 @@ export class ExercisesController {
 
   @Patch(":id")
   @UseGuards(JwtAuthGuard)
-  update(@Param("id", ParseIntPipe) id: number, @Body() updateExerciseDto: UpdateExerciseDto) {
-    return this.exercisesService.update(+id, updateExerciseDto);
+  update(@Param("id", ParseIntPipe) id: number, @Body() updateExerciseDto: UpdateExerciseDto, @GetUser("id") userId: number) {
+    return this.exercisesService.update(id, updateExerciseDto, userId);
   }
 
   @Delete(":id")
+  @HttpCode(204)
   @UseGuards(JwtAuthGuard)
-  remove(@Param("id", ParseIntPipe) id: number) {
-    return this.exercisesService.remove(+id);
+  remove(@Param("id", ParseIntPipe) id: number, @GetUser("id") userId: number) {
+    return this.exercisesService.remove(id, userId);
   }
 }

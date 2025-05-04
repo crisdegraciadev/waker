@@ -97,11 +97,7 @@ describe("ExercisesController (e2e)", () => {
       const { body, statusCode } = await post("/exercises").send(CREATE_EXERCISE_DTO);
 
       expect(statusCode).toBe(409);
-
-      expect(body).toEqual({
-        statusCode: 409,
-        message: "resource already exists",
-      });
+      expect(body.message).toBe("name is already in use");
     });
   });
 
@@ -152,17 +148,6 @@ describe("ExercisesController (e2e)", () => {
 
       expect(statusCode).toBe(404);
       expect(body.message).toBe("exercise not found");
-    });
-
-    it("should return 409 CONFLICT if exercise is created twice by the same user", async () => {
-      const { post } = authRequest(api, authToken);
-      await post("/exercises").send(CREATE_EXERCISE_DTO);
-
-      await post("/exercises").send(CREATE_EXERCISE_DTO);
-      const { body, statusCode } = await post("/exercises").send(CREATE_EXERCISE_DTO);
-
-      expect(statusCode).toBe(409);
-      expect(body.message).toBe("resource already exists");
     });
   });
 
@@ -388,6 +373,154 @@ describe("ExercisesController (e2e)", () => {
 
       expect(statusCode).toBe(401);
       expect(body.message).toBe("Unauthorized");
+    });
+  });
+
+  describe("DELETE /exercises/:id", () => {
+    it("should return 204 NO CONTENT if exercise is deleted", async () => {
+      const { post, del } = authRequest(api, authToken);
+      const { body: exercise } = await post("/exercises").send(CREATE_EXERCISE_DTO);
+
+      const { statusCode } = await del(`/exercises/${exercise.id}`);
+
+      expect(statusCode).toBe(204);
+
+      const { get } = authRequest(api, authToken);
+      const { statusCode: getStatusCode } = await get(`/exercises/${exercise.id}`);
+      expect(getStatusCode).toBe(404);
+    });
+
+    it("should return 401 UNAUTHORIZED if user is not authenticated", async () => {
+      const { del } = authRequest(api, "");
+      const { body, statusCode } = await del("/exercises/1");
+
+      expect(statusCode).toBe(401);
+      expect(body.message).toBe("Unauthorized");
+    });
+
+    it("should return 404 NOT FOUND if exercise does not exist", async () => {
+      const { del } = authRequest(api, authToken);
+      const { body, statusCode } = await del("/exercises/999");
+
+      expect(statusCode).toBe(404);
+      expect(body.message).toBe("exercise not found");
+    });
+
+    it("should return 404 NOT FOUND if exercise does not belong to user", async () => {
+      const reqUser1 = authRequest(api, authToken);
+      const { body: user1Exercise } = await reqUser1.post("/exercises").send(CREATE_EXERCISE_DTO);
+
+      authToken = await generateJwt(api, CREATE_USER_DTO_2);
+      const reqUser2 = authRequest(api, authToken);
+
+      const { body, statusCode } = await reqUser2.del(`/exercises/${user1Exercise.id}`);
+
+      expect(statusCode).toBe(404);
+      expect(body.message).toBe("exercise not found");
+    });
+  });
+
+  describe("PATCH /exercises/:id", () => {
+    it("should return 200 OK if exercise is updated", async () => {
+      const { post, patch } = authRequest(api, authToken);
+      const { body: exercise } = await post("/exercises").send(CREATE_EXERCISE_DTO);
+
+      const updateDto = {
+        name: "Modified Push ups",
+        difficulty: "HARD",
+        type: "WEIGHT",
+      };
+
+      const { body, statusCode } = await patch(`/exercises/${exercise.id}`).send(updateDto);
+
+      expect(statusCode).toBe(200);
+      expect(body).toMatchObject({
+        id: exercise.id,
+        name: updateDto.name,
+        difficulty: updateDto.difficulty,
+        type: updateDto.type,
+      });
+    });
+
+    it("should return 200 OK if exercise is partially updated", async () => {
+      const { post, patch } = authRequest(api, authToken);
+      const { body: exercise } = await post("/exercises").send(CREATE_EXERCISE_DTO);
+
+      const updateDto = {
+        name: "Modified Push ups",
+      };
+
+      const { body, statusCode } = await patch(`/exercises/${exercise.id}`).send(updateDto);
+
+      expect(statusCode).toBe(200);
+      expect(body).toMatchObject({
+        id: exercise.id,
+        name: updateDto.name,
+        difficulty: exercise.difficulty,
+        type: exercise.type,
+      });
+    });
+
+    it("should return 400 BAD REQUEST if fields are invalid", async () => {
+      const { post, patch } = authRequest(api, authToken);
+      const { body: exercise } = await post("/exercises").send(CREATE_EXERCISE_DTO);
+
+      const testCases = [
+        {
+          payload: { difficulty: "INVALID" },
+          message: "difficulty must be one of the following values: EASY, MEDIUM, HARD",
+        },
+        {
+          payload: { type: "INVALID" },
+          message: "type must be one of the following values: BODY_WEIGHT, WEIGHT, STRETCH, MOBILITY",
+        },
+      ];
+
+      for (const { payload, message } of testCases) {
+        const { body, statusCode } = await patch(`/exercises/${exercise.id}`).send(payload);
+        expect(statusCode).toBe(400);
+        expect(body.message).toContain(message);
+      }
+    });
+
+    it("should return 401 UNAUTHORIZED if user is not authenticated", async () => {
+      const { patch } = authRequest(api, "");
+      const { body, statusCode } = await patch("/exercises/1").send({});
+
+      expect(statusCode).toBe(401);
+      expect(body.message).toBe("Unauthorized");
+    });
+
+    it("should return 404 NOT FOUND if exercise does not exist", async () => {
+      const { patch } = authRequest(api, authToken);
+      const { body, statusCode } = await patch("/exercises/999").send({ name: "New Name" });
+
+      expect(statusCode).toBe(404);
+      expect(body.message).toBe("exercise not found");
+    });
+
+    it("should return 404 NOT FOUND if exercise does not belong to user", async () => {
+      const reqUser1 = authRequest(api, authToken);
+      const { body: user1Exercise } = await reqUser1.post("/exercises").send(CREATE_EXERCISE_DTO);
+
+      authToken = await generateJwt(api, CREATE_USER_DTO_2);
+      const reqUser2 = authRequest(api, authToken);
+
+      const { body, statusCode } = await reqUser2.patch(`/exercises/${user1Exercise.id}`).send({ name: "New Name" });
+
+      expect(statusCode).toBe(404);
+      expect(body.message).toBe("exercise not found");
+    });
+
+    it("should return 409 CONFLICT if new name is already in use", async () => {
+      const { post, patch } = authRequest(api, authToken);
+      await post("/exercises").send(CREATE_EXERCISE_DTO);
+      const { body: exercise } = await post("/exercises").send(CREATE_EXERCISE_DTO_2);
+
+      const { body, statusCode } = await patch(`/exercises/${exercise.id}`).send({ name: CREATE_EXERCISE_DTO.name });
+
+      expect(statusCode).toBe(409);
+      expect(body.message).toBe("name is already in use");
     });
   });
 });

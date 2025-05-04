@@ -1,7 +1,6 @@
 import { IsEnum, IsOptional } from "class-validator";
 import { SortOrder } from "~/components/utils/types";
 
-
 export class SortExerciseDto {
   @IsEnum(["name", "difficulty", "type", "createdAt"])
   @IsOptional()
@@ -10,4 +9,4 @@ export class SortExerciseDto {
   @IsEnum(SortOrder)
   @IsOptional()
   order?: SortOrder;
-} 
+}

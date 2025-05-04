@@ -72,7 +72,7 @@ describe("UsersController (e2e)", () => {
       const { body, statusCode } = await request(api).post("/users").send(CREATE_USER_DTO_1);
 
       expect(statusCode).toBe(409);
-      expect(body.message).toBe("resource already exists");
+      expect(body.message).toBe("email already in use");
     });
   });
 });

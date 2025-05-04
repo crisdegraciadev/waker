@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { Exercise, Prisma } from "@prisma/client";
 import { PaginationDto } from "~/components/dtos/pagination.dto";
 import { PageEntity } from "~/components/entities/page.entity";
@@ -20,6 +20,9 @@ export class ExercisesService {
   ) { }
 
   async create(createExerciseDto: CreateExerciseDto, userId: number): Promise<ExerciseEntity> {
+    const { name } = createExerciseDto;
+    await this.isNameUniqueGuard(name, userId);
+
     const exercise = await this.db.exercise.create({
       data: { ...createExerciseDto, userId },
     });
@@ -44,7 +47,7 @@ export class ExercisesService {
       }),
     };
 
-    const orderBy = sortBy ? { [sortBy]: order || SortOrder.ASC } : { name: order || SortOrder.ASC };
+    const orderBy = sortBy ? { [sortBy]: order || SortOrder.ASC } : { name: order || SortOrder.ASC };
 
     return this.paginationService.paginate<Exercise, "Exercise", ExerciseEntity>({
       modelName: "Exercise",
@@ -57,6 +60,36 @@ export class ExercisesService {
   }
 
   async findOne(id: number, userId: number): Promise<ExerciseEntity> {
+    const exercise = await this.exerciseExistsGuard(id, userId);
+    return new ExerciseEntity(exercise);
+  }
+
+  async update(id: number, updateExerciseDto: UpdateExerciseDto, userId: number): Promise<ExerciseEntity> {
+    const exerciseToUpdate = await this.exerciseExistsGuard(id, userId);
+
+    const { name } = updateExerciseDto;
+
+    if (name && name !== exerciseToUpdate.name) {
+      await this.isNameUniqueGuard(name, userId);
+    }
+
+    const exercise = await this.db.exercise.update({
+      where: { id, userId },
+      data: updateExerciseDto,
+    });
+
+    return new ExerciseEntity(exercise);
+  }
+
+  async remove(id: number, userId: number): Promise<void> {
+     await this.exerciseExistsGuard(id, userId);
+
+    await this.db.exercise.delete({
+      where: { id, userId },
+    });
+  }
+
+  private async exerciseExistsGuard(id: number, userId: number) {
     const exercise = await this.db.exercise.findUnique({
       where: { id, userId },
     });
@@ -65,14 +98,21 @@ export class ExercisesService {
       throw new NotFoundException("exercise not found");
     }
 
-    return new ExerciseEntity(exercise);
+    return exercise;
   }
 
-  update(id: number, updateExerciseDto: UpdateExerciseDto) {
-    return `This action updates a #${id} exercise`;
-  }
+  private async isNameUniqueGuard(name: string, userId: number) {
+    const isNameAlreadyInUse = await this.db.exercise.findUnique({
+      where: {
+        exerciseIdentifier: {
+          userId,
+          name,
+        },
+      },
+    });
 
-  remove(id: number) {
-    return `This action removes a #${id} exercise`;
+    if (isNameAlreadyInUse) {
+      throw new ConflictException("name is already in use");
+    }
   }
 }

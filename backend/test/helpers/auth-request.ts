@@ -6,6 +6,6 @@ export default function authenticatedRequest(api: App, token: string) {
     get: (url: string) => request(api).get(url).set("Authorization", `Bearer ${token}`),
     post: (url: string) => request(api).post(url).set("Authorization", `Bearer ${token}`),
     patch: (url: string) => request(api).patch(url).set("Authorization", `Bearer ${token}`),
-    delete: (url: string) => request(api).delete(url).set("Authorization", `Bearer ${token}`),
+    del: (url: string) => request(api).delete(url).set("Authorization", `Bearer ${token}`),
   };
 }
