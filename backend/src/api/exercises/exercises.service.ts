@@ -1,12 +1,16 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
+import { Exercise, Prisma } from "@prisma/client";
 import { PaginationDto } from "~/components/dtos/pagination.dto";
+import { PageEntity } from "~/components/entities/page.entity";
 import { DatabaseService } from "~/shared/database.service";
 import { PaginationService } from "~/shared/pagination.service";
 import { CreateExerciseDto } from "./dtos/create-exercise.dto";
+import { FilterExerciseDto } from "./dtos/filter-exercise.dto";
 import { UpdateExerciseDto } from "./dtos/update-exercise.dto";
+import { ExerciseWhere } from "./entities/exercise-where.type";
 import { ExerciseEntity } from "./entities/exercise.entity";
-import { PageEntity } from "~/components/entities/page.entity";
-import { Exercise } from "@prisma/client";
+import { SortExerciseDto } from "./dtos/sort-exercise.dto";
+import { SortOrder } from "~/components/utils/types";
 
 @Injectable()
 export class ExercisesService {
@@ -15,7 +19,7 @@ export class ExercisesService {
     private paginationService: PaginationService,
   ) { }
 
-  async create(createExerciseDto: CreateExerciseDto, userId: number) {
+  async create(createExerciseDto: CreateExerciseDto, userId: number): Promise<ExerciseEntity> {
     const exercise = await this.db.exercise.create({
       data: { ...createExerciseDto, userId },
     });
@@ -23,23 +27,36 @@ export class ExercisesService {
     return new ExerciseEntity(exercise);
   }
 
-  async findAll({ pageNumber, limit }: PaginationDto, userId: number) {
-    const { items, pageable } = await this.paginationService.paginate<Exercise, "Exercise">({
+  async findAll(pagination: PaginationDto, filters: FilterExerciseDto, sort: SortExerciseDto, userId: number): Promise<PageEntity<ExerciseEntity>> {
+    const { page, limit } = pagination;
+    const { difficulty, type, name } = filters;
+    const { sortBy, order } = sort;
+
+    const where: ExerciseWhere = {
+      userId,
+      ...(difficulty && { difficulty }),
+      ...(type && { type }),
+      ...(name && {
+        name: {
+          contains: name,
+          mode: Prisma.QueryMode.insensitive,
+        },
+      }),
+    };
+
+    const orderBy = sortBy ? { [sortBy]: order || SortOrder.ASC } : { name: order || SortOrder.ASC };
+
+    return this.paginationService.paginate<Exercise, "Exercise", ExerciseEntity>({
       modelName: "Exercise",
-      pageNumber,
+      pageNumber: page,
       limit,
-      where: { userId },
+      where,
+      orderBy,
+      mapper: (exercises) => exercises.map((e) => new ExerciseEntity(e)),
     });
-
-    const page = new PageEntity({
-      data: items.map((e) => new ExerciseEntity(e)),
-      pageable,
-    });
-
-    return page;
   }
 
-  async findOne(id: number, userId: number) {
+  async findOne(id: number, userId: number): Promise<ExerciseEntity> {
     const exercise = await this.db.exercise.findUnique({
       where: { id, userId },
     });

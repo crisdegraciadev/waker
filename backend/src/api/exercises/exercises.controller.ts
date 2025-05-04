@@ -5,6 +5,8 @@ import { UpdateExerciseDto } from "./dtos/update-exercise.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt.guard";
 import { GetUser } from "~/components/decorators/get-user.decorator";
 import { PaginationDto } from "~/components/dtos/pagination.dto";
+import { FilterExerciseDto } from "./dtos/filter-exercise.dto";
+import { SortExerciseDto } from "./dtos/sort-exercise.dto";
 
 @Controller("exercises")
 export class ExercisesController {
@@ -18,8 +20,13 @@ export class ExercisesController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  findAll(@Query() paginationDto: PaginationDto, @GetUser("id") userId: number) {
-    return this.exercisesService.findAll(paginationDto, userId);
+  findAll(
+    @Query() paginationDto: PaginationDto,
+    @Query() filterDto: FilterExerciseDto,
+    @Query() sortDto: SortExerciseDto,
+    @GetUser("id") userId: number
+  ) {
+    return this.exercisesService.findAll(paginationDto, filterDto, sortDto, userId);
   }
 
   @Get(":id")

@@ -3,7 +3,7 @@ import { App } from "supertest/types";
 import { ExercisesModule } from "~/api/exercises/exercises.module";
 import { UsersModule } from "../src/api/users/users.module";
 import { createTestApp } from "./config/test-app.factory";
-import { CREATE_EXERCISE_DTO } from "./fixtures/exercise";
+import { CREATE_EXERCISE_DTO, CREATE_EXERCISE_DTO_2, CREATE_EXERCISE_DTO_3, CREATE_EXERCISE_DTO_4 } from "./fixtures/exercise";
 import { CREATE_USER_DTO_1, CREATE_USER_DTO_2 } from "./fixtures/users";
 import authRequest from "./helpers/auth-request";
 import extractUserIdFromToken from "./helpers/extract-user-from-token";
@@ -114,7 +114,7 @@ describe("ExercisesController (e2e)", () => {
 
       expect(statusCode).toBe(200);
 
-      expect(body).toEqual({
+      expect(body).toMatchObject({
         id: exercise.id,
         name: exercise.name,
         difficulty: exercise.difficulty,
@@ -158,7 +158,7 @@ describe("ExercisesController (e2e)", () => {
       const { post } = authRequest(api, authToken);
       await post("/exercises").send(CREATE_EXERCISE_DTO);
 
-       await post("/exercises").send(CREATE_EXERCISE_DTO);
+      await post("/exercises").send(CREATE_EXERCISE_DTO);
       const { body, statusCode } = await post("/exercises").send(CREATE_EXERCISE_DTO);
 
       expect(statusCode).toBe(409);
@@ -167,48 +167,207 @@ describe("ExercisesController (e2e)", () => {
   });
 
   describe("GET /exercises", () => {
-    it("should return 200 OK and get all exercises with pagination", async () => {
-      const { post, get } = authRequest(api, authToken);
-      
-      // Crear varios ejercicios
+    beforeEach(async () => {
+      const { post } = authRequest(api, authToken);
       await post("/exercises").send(CREATE_EXERCISE_DTO);
-      await post("/exercises").send({ ...CREATE_EXERCISE_DTO, name: "Pull-ups" });
-      await post("/exercises").send({ ...CREATE_EXERCISE_DTO, name: "Squats" });
+      await post("/exercises").send(CREATE_EXERCISE_DTO_2);
+      await post("/exercises").send(CREATE_EXERCISE_DTO_3);
+      await post("/exercises").send(CREATE_EXERCISE_DTO_4);
+    });
 
-      const { body, statusCode } = await get("/exercises?page=1&limit=2");
+    it("should return 200 OK and get all exercises with pagination", async () => {
+      const { get } = authRequest(api, authToken);
 
-      expect(statusCode).toBe(200);
-      expect(body.data).toHaveLength(2);
-      expect(body.meta).toEqual({
-        total: 3,
-        page: 1,
-        limit: 2,
+      const { body: firstPageBody, statusCode: firstPageStatusCode } = await get("/exercises?page=1&limit=2");
+
+      expect(firstPageStatusCode).toBe(200);
+      expect(firstPageBody.data).toHaveLength(2);
+      expect(firstPageBody.pageable).toEqual({
+        pageNumber: 1,
+        pageSize: 2,
+        totalEntities: 4,
         totalPages: 2,
+        nextPage: 2,
+        prevPage: 1,
+      });
+
+      const { body: secondPageBody, statusCode: secondPageStatusCode } = await get("/exercises?page=2&limit=2");
+
+      expect(secondPageStatusCode).toBe(200);
+      expect(secondPageBody.data).toHaveLength(2);
+      expect(secondPageBody.pageable).toEqual({
+        pageNumber: 2,
+        pageSize: 2,
+        totalEntities: 4,
+        totalPages: 2,
+        nextPage: 2,
+        prevPage: 1,
       });
     });
 
     it("should return 200 OK with default pagination values", async () => {
-      const { post, get } = authRequest(api, authToken);
-      
-      // Crear varios ejercicios
-      await post("/exercises").send(CREATE_EXERCISE_DTO);
-      await post("/exercises").send({ ...CREATE_EXERCISE_DTO, name: "Pull-ups" });
+      const { get } = authRequest(api, authToken);
 
       const { body, statusCode } = await get("/exercises");
 
       expect(statusCode).toBe(200);
-      expect(body.data).toHaveLength(2);
-      expect(body.meta).toEqual({
-        total: 2,
-        page: 1,
-        limit: 10,
+      expect(body.data).toHaveLength(4);
+      expect(body.pageable).toEqual({
+        pageNumber: 1,
+        pageSize: 10,
+        totalEntities: 4,
         totalPages: 1,
+        nextPage: 1,
+        prevPage: 1,
       });
+    });
+
+    it("should return 200 OK if filter exercises by name", async () => {
+      const { get } = authRequest(api, authToken);
+      const { body, statusCode } = await get("/exercises?name=push");
+
+      expect(statusCode).toBe(200);
+      expect(body.data).toHaveLength(1);
+      expect(body.data[0].name).toBe("Push ups");
+    });
+
+    it("should return 200 OK if filter exercises by difficulty", async () => {
+      const { get } = authRequest(api, authToken);
+      const { body, statusCode } = await get("/exercises?difficulty=HARD");
+
+      expect(statusCode).toBe(200);
+      expect(body.data).toHaveLength(2);
+      expect(body.data.map((e: any) => e.name)).toEqual(expect.arrayContaining(["Pull ups", "Deadlift"]));
+    });
+
+    it("should return 200 OK if filter exercises by type", async () => {
+      const { get } = authRequest(api, authToken);
+      const { body, statusCode } = await get("/exercises?type=WEIGHT");
+
+      expect(statusCode).toBe(200);
+      expect(body.data).toHaveLength(2);
+      expect(body.data.map((e: any) => e.name)).toEqual(expect.arrayContaining(["Squats", "Deadlift"]));
+    });
+
+    it("should return 200 OK if filter exercises by multiple criteria", async () => {
+      const { get } = authRequest(api, authToken);
+      const { body, statusCode } = await get("/exercises?difficulty=HARD&type=BODY_WEIGHT");
+
+      expect(statusCode).toBe(200);
+      expect(body.data).toHaveLength(1);
+      expect(body.data[0].name).toBe("Pull ups");
+    });
+
+    it("should return 200 OK with empty array when no exercises match the filters", async () => {
+      const { get } = authRequest(api, authToken);
+      const { body, statusCode } = await get("/exercises?name=nonExistent");
+
+      expect(statusCode).toBe(200);
+      expect(body.data).toHaveLength(0);
+    });
+
+    it("should return 200 OK if sort exercises by name ascending", async () => {
+      const { get } = authRequest(api, authToken);
+      const { body, statusCode } = await get("/exercises?sortBy=name&order=asc");
+
+      expect(statusCode).toBe(200);
+      expect(body.data).toHaveLength(4);
+      expect(body.data.map((e: any) => e.name)).toEqual(["Deadlift", "Pull ups", "Push ups", "Squats"]);
+    });
+
+    it("should return 200 OK if sort exercises by name descending", async () => {
+      const { get } = authRequest(api, authToken);
+      const { body, statusCode } = await get("/exercises?sortBy=name&order=desc");
+
+      expect(statusCode).toBe(200);
+      expect(body.data).toHaveLength(4);
+      expect(body.data.map((e: any) => e.name)).toEqual(["Squats", "Push ups", "Pull ups", "Deadlift"]);
+    });
+
+    it("should return 200 OK if sort exercises by difficulty ascending", async () => {
+      const { get } = authRequest(api, authToken);
+      const { body, statusCode } = await get("/exercises?sortBy=difficulty&order=asc");
+
+      expect(statusCode).toBe(200);
+      expect(body.data).toHaveLength(4);
+      expect(body.data.map((e: any) => e.name)).toEqual(["Squats", "Push ups", "Pull ups", "Deadlift"]);
+    });
+
+    it("should return 200 OK if sort exercises by difficulty descending", async () => {
+      const { get } = authRequest(api, authToken);
+      const { body, statusCode } = await get("/exercises?sortBy=difficulty&order=desc");
+
+      expect(statusCode).toBe(200);
+      expect(body.data).toHaveLength(4);
+      expect(body.data.map((e: any) => e.name)).toEqual(["Pull ups", "Deadlift", "Push ups", "Squats"]);
+    });
+
+    it("should return 200 OK if sort exercises by type ascending", async () => {
+      const { get } = authRequest(api, authToken);
+      const { body, statusCode } = await get("/exercises?sortBy=type&order=asc");
+
+      expect(statusCode).toBe(200);
+      expect(body.data).toHaveLength(4);
+      expect(body.data.map((e: any) => e.name)).toEqual(["Push ups", "Pull ups", "Squats", "Deadlift"]);
+    });
+
+    it("should return 200 OK if sort exercises by type descending", async () => {
+      const { get } = authRequest(api, authToken);
+      const { body, statusCode } = await get("/exercises?sortBy=type&order=desc");
+
+      expect(statusCode).toBe(200);
+      expect(body.data).toHaveLength(4);
+      expect(body.data.map((e: any) => e.name)).toEqual(["Squats", "Deadlift", "Push ups", "Pull ups"]);
+    });
+
+    it("should return 200 OK if sort exercises by createdAt ascending", async () => {
+      const { get } = authRequest(api, authToken);
+      const { body, statusCode } = await get("/exercises?sortBy=createdAt&order=asc");
+
+      expect(statusCode).toBe(200);
+      expect(body.data).toHaveLength(4);
+      expect(body.data.map((e: any) => e.name)).toEqual(["Push ups", "Pull ups", "Squats", "Deadlift"]);
+    });
+
+    it("should return 200 OK if sort exercises by createdAt descending", async () => {
+      const { get } = authRequest(api, authToken);
+      const { body, statusCode } = await get("/exercises?sortBy=createdAt&order=desc");
+
+      expect(statusCode).toBe(200);
+      expect(body.data).toHaveLength(4);
+      expect(body.data.map((e: any) => e.name)).toEqual(["Deadlift", "Squats", "Pull ups", "Push ups"]);
+    });
+
+    it("should return 200 OK if sort exercises with default order", async () => {
+      const { get } = authRequest(api, authToken);
+      const { body, statusCode } = await get("/exercises?sortBy=name");
+
+      expect(statusCode).toBe(200);
+      expect(body.data).toHaveLength(4);
+      expect(body.data.map((e: any) => e.name)).toEqual(["Deadlift", "Pull ups", "Push ups", "Squats"]);
+    });
+
+    it("should return 200 OK if sort exercises with default field", async () => {
+      const { get } = authRequest(api, authToken);
+      const { body, statusCode } = await get("/exercises?order=desc");
+
+      expect(statusCode).toBe(200);
+      expect(body.data).toHaveLength(4);
+      expect(body.data.map((e: any) => e.name)).toEqual(["Squats", "Push ups", "Pull ups", "Deadlift"]);
+    });
+
+    it("should return 200 OK if sort exercises with filters", async () => {
+      const { get } = authRequest(api, authToken);
+      const { body, statusCode } = await get("/exercises?sortBy=difficulty&order=desc&type=WEIGHT");
+
+      expect(statusCode).toBe(200);
+      expect(body.data).toHaveLength(2);
+      expect(body.data.map((e: any) => e.name)).toEqual(["Deadlift", "Squats"]);
     });
 
     it("should return 400 BAD REQUEST if pagination values are invalid", async () => {
       const { get } = authRequest(api, authToken);
-      
+
       const testCases = [
         { query: "page=0&limit=10", message: "page must not be less than 1" },
         { query: "page=1&limit=0", message: "limit must not be less than 1" },

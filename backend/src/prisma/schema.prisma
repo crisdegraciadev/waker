@@ -27,6 +27,7 @@ model Exercise {
   type       ExerciseType       @default(WEIGHT)
   user       User               @relation(fields: [userId], references: [id])
   userId     Int
+  createdAt  DateTime           @default(now())
 
   @@unique([userId, name], name: "exerciseIdentifier")
 }
