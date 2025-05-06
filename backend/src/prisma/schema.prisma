@@ -47,12 +47,13 @@ enum ExerciseType {
 }
 
 model Workout {
-  id        Int         @id @default(autoincrement())
-  name      String
-  type      WorkoutType @default(WEIGHTS)
-  user      User        @relation(fields: [userId], references: [id])
-  userId    Int
-  createdAt DateTime    @default(now())
+  id                  Int                  @id @default(autoincrement())
+  name                String
+  type                WorkoutType          @default(WEIGHTS)
+  user                User                 @relation(fields: [userId], references: [id])
+  userId              Int
+  createdAt           DateTime             @default(now())
+  workoutProgressions WorkoutProgression[]
 
   @@unique([userId, name], name: "workoutIdentifier")
 }
@@ -64,4 +65,11 @@ enum WorkoutType {
   CARDIO
   TABATA
   HIIT
+}
+
+model WorkoutProgression {
+  id        Int      @id @default(autoincrement())
+  workout   Workout  @relation(fields: [workoutId], references: [id])
+  workoutId Int
+  createdAt DateTime @default(now())
 }
