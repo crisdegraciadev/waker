@@ -13,6 +13,8 @@ export class ExerciseEntity implements Exercise {
 
   userId: number;
 
+  createdAt: Date;
+
   constructor(partial: Partial<ExerciseEntity>) {
     Object.assign(this, partial);
   }

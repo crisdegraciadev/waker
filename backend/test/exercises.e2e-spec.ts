@@ -3,7 +3,7 @@ import { App } from "supertest/types";
 import { ExercisesModule } from "~/api/exercises/exercises.module";
 import { UsersModule } from "../src/api/users/users.module";
 import { createTestApp } from "./config/test-app.factory";
-import { CREATE_EXERCISE_DTO, CREATE_EXERCISE_DTO_2, CREATE_EXERCISE_DTO_3, CREATE_EXERCISE_DTO_4 } from "./fixtures/exercise";
+import { CREATE_EXERCISE_DTO_1, CREATE_EXERCISE_DTO_2, CREATE_EXERCISE_DTO_3, CREATE_EXERCISE_DTO_4 } from "./fixtures/exercise";
 import { CREATE_USER_DTO_1, CREATE_USER_DTO_2 } from "./fixtures/users";
 import authRequest from "./helpers/auth-request";
 import extractUserIdFromToken from "./helpers/extract-user-from-token";
@@ -35,7 +35,7 @@ describe("ExercisesController (e2e)", () => {
       const userId = extractUserIdFromToken(authToken);
 
       const { post } = authRequest(api, authToken);
-      const { body, statusCode } = await post("/exercises").send(CREATE_EXERCISE_DTO);
+      const { body, statusCode } = await post("/exercises").send(CREATE_EXERCISE_DTO_1);
 
       expect(statusCode).toBe(201);
 
@@ -44,9 +44,9 @@ describe("ExercisesController (e2e)", () => {
       });
 
       expect(body.id).toBeDefined();
-      expect(CREATE_EXERCISE_DTO.name).toBe(body.name);
-      expect(CREATE_EXERCISE_DTO.difficulty).toBe(body.difficulty);
-      expect(CREATE_EXERCISE_DTO.type).toBe(body.type);
+      expect(CREATE_EXERCISE_DTO_1.name).toBe(body.name);
+      expect(CREATE_EXERCISE_DTO_1.difficulty).toBe(body.difficulty);
+      expect(CREATE_EXERCISE_DTO_1.type).toBe(body.type);
       expect(userId).toBe(body.userId);
     });
 
@@ -93,8 +93,8 @@ describe("ExercisesController (e2e)", () => {
 
     it("should return 409 CONFLICT if exercise already exists", async () => {
       const { post } = authRequest(api, authToken);
-      await post("/exercises").send(CREATE_EXERCISE_DTO);
-      const { body, statusCode } = await post("/exercises").send(CREATE_EXERCISE_DTO);
+      await post("/exercises").send(CREATE_EXERCISE_DTO_1);
+      const { body, statusCode } = await post("/exercises").send(CREATE_EXERCISE_DTO_1);
 
       expect(statusCode).toBe(409);
       expect(body.message).toBe("name is already in use");
@@ -104,7 +104,7 @@ describe("ExercisesController (e2e)", () => {
   describe("GET /exercises/:id", () => {
     it("should return 200 OK and get an exercise", async () => {
       const { post, get } = authRequest(api, authToken);
-      const { body: exercise } = await post("/exercises").send(CREATE_EXERCISE_DTO);
+      const { body: exercise } = await post("/exercises").send(CREATE_EXERCISE_DTO_1);
 
       const { body, statusCode } = await get(`/exercises/${exercise.id}`);
 
@@ -137,12 +137,12 @@ describe("ExercisesController (e2e)", () => {
 
     it("should return 404 NOT FOUND if exercise does not belong to user", async () => {
       const reqUser1 = authRequest(api, authToken);
-      const { body: user1Exercise } = await reqUser1.post("/exercises").send(CREATE_EXERCISE_DTO);
+      const { body: user1Exercise } = await reqUser1.post("/exercises").send(CREATE_EXERCISE_DTO_1);
 
       authToken = await generateJwt(api, CREATE_USER_DTO_2);
       const reqUser2 = authRequest(api, authToken);
 
-      await reqUser2.post("/exercises").send(CREATE_EXERCISE_DTO);
+      await reqUser2.post("/exercises").send(CREATE_EXERCISE_DTO_1);
 
       const { body, statusCode } = await reqUser2.get(`/exercises/${user1Exercise.id}`);
 
@@ -154,7 +154,7 @@ describe("ExercisesController (e2e)", () => {
   describe("GET /exercises", () => {
     beforeEach(async () => {
       const { post } = authRequest(api, authToken);
-      await post("/exercises").send(CREATE_EXERCISE_DTO);
+      await post("/exercises").send(CREATE_EXERCISE_DTO_1);
       await post("/exercises").send(CREATE_EXERCISE_DTO_2);
       await post("/exercises").send(CREATE_EXERCISE_DTO_3);
       await post("/exercises").send(CREATE_EXERCISE_DTO_4);
@@ -379,7 +379,7 @@ describe("ExercisesController (e2e)", () => {
   describe("DELETE /exercises/:id", () => {
     it("should return 204 NO CONTENT if exercise is deleted", async () => {
       const { post, del } = authRequest(api, authToken);
-      const { body: exercise } = await post("/exercises").send(CREATE_EXERCISE_DTO);
+      const { body: exercise } = await post("/exercises").send(CREATE_EXERCISE_DTO_1);
 
       const { statusCode } = await del(`/exercises/${exercise.id}`);
 
@@ -408,7 +408,7 @@ describe("ExercisesController (e2e)", () => {
 
     it("should return 404 NOT FOUND if exercise does not belong to user", async () => {
       const reqUser1 = authRequest(api, authToken);
-      const { body: user1Exercise } = await reqUser1.post("/exercises").send(CREATE_EXERCISE_DTO);
+      const { body: user1Exercise } = await reqUser1.post("/exercises").send(CREATE_EXERCISE_DTO_1);
 
       authToken = await generateJwt(api, CREATE_USER_DTO_2);
       const reqUser2 = authRequest(api, authToken);
@@ -423,7 +423,7 @@ describe("ExercisesController (e2e)", () => {
   describe("PATCH /exercises/:id", () => {
     it("should return 200 OK if exercise is updated", async () => {
       const { post, patch } = authRequest(api, authToken);
-      const { body: exercise } = await post("/exercises").send(CREATE_EXERCISE_DTO);
+      const { body: exercise } = await post("/exercises").send(CREATE_EXERCISE_DTO_1);
 
       const updateDto = {
         name: "Modified Push ups",
@@ -444,7 +444,7 @@ describe("ExercisesController (e2e)", () => {
 
     it("should return 200 OK if exercise is partially updated", async () => {
       const { post, patch } = authRequest(api, authToken);
-      const { body: exercise } = await post("/exercises").send(CREATE_EXERCISE_DTO);
+      const { body: exercise } = await post("/exercises").send(CREATE_EXERCISE_DTO_1);
 
       const updateDto = {
         name: "Modified Push ups",
@@ -463,7 +463,7 @@ describe("ExercisesController (e2e)", () => {
 
     it("should return 400 BAD REQUEST if fields are invalid", async () => {
       const { post, patch } = authRequest(api, authToken);
-      const { body: exercise } = await post("/exercises").send(CREATE_EXERCISE_DTO);
+      const { body: exercise } = await post("/exercises").send(CREATE_EXERCISE_DTO_1);
 
       const testCases = [
         {
@@ -501,7 +501,7 @@ describe("ExercisesController (e2e)", () => {
 
     it("should return 404 NOT FOUND if exercise does not belong to user", async () => {
       const reqUser1 = authRequest(api, authToken);
-      const { body: user1Exercise } = await reqUser1.post("/exercises").send(CREATE_EXERCISE_DTO);
+      const { body: user1Exercise } = await reqUser1.post("/exercises").send(CREATE_EXERCISE_DTO_1);
 
       authToken = await generateJwt(api, CREATE_USER_DTO_2);
       const reqUser2 = authRequest(api, authToken);
@@ -514,10 +514,10 @@ describe("ExercisesController (e2e)", () => {
 
     it("should return 409 CONFLICT if new name is already in use", async () => {
       const { post, patch } = authRequest(api, authToken);
-      await post("/exercises").send(CREATE_EXERCISE_DTO);
+      await post("/exercises").send(CREATE_EXERCISE_DTO_1);
       const { body: exercise } = await post("/exercises").send(CREATE_EXERCISE_DTO_2);
 
-      const { body, statusCode } = await patch(`/exercises/${exercise.id}`).send({ name: CREATE_EXERCISE_DTO.name });
+      const { body, statusCode } = await patch(`/exercises/${exercise.id}`).send({ name: CREATE_EXERCISE_DTO_1.name });
 
       expect(statusCode).toBe(409);
       expect(body.message).toBe("name is already in use");

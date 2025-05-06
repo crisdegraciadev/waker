@@ -18,6 +18,7 @@ model User {
   email        String     @unique
   passwordHash String
   exercises    Exercise[]
+  workouts     Workout[]
 }
 
 model Exercise {
@@ -43,4 +44,24 @@ enum ExerciseType {
   WEIGHT
   STRETCH
   MOBILITY
+}
+
+model Workout {
+  id        Int         @id @default(autoincrement())
+  name      String
+  type      WorkoutType @default(WEIGHTS)
+  user      User        @relation(fields: [userId], references: [id])
+  userId    Int
+  createdAt DateTime    @default(now())
+
+  @@unique([userId, name], name: "workoutIdentifier")
+}
+
+enum WorkoutType {
+  CALISTHENICS
+  WEIGHTS
+  MIXED
+  CARDIO
+  TABATA
+  HIIT
 }

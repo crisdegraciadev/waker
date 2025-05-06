@@ -1,4 +1,4 @@
-export const CREATE_EXERCISE_DTO = {
+export const CREATE_EXERCISE_DTO_1 = {
   name: "Push ups",
   difficulty: "MEDIUM",
   type: "BODY_WEIGHT",
