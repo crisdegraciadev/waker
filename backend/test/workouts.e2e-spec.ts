@@ -283,13 +283,13 @@ describe("WorkoutsController (e2e)", () => {
   });
 
   describe("DELETE /workouts/:id", () => {
-    it("should return 200 OK and delete a workout", async () => {
+    it("should return 204 NO CONTENT and delete a workout", async () => {
       const { post, del, get } = authRequest(api, authToken);
       const { body: workout } = await post("/workouts").send(CREATE_WORKOUT_DTO_1);
 
       const { statusCode } = await del(`/workouts/${workout.id}`);
 
-      expect(statusCode).toBe(200);
+      expect(statusCode).toBe(204);
 
       const { statusCode: getStatusCode } = await get(`/workouts/${workout.id}`);
 

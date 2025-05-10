@@ -5,7 +5,6 @@ import { PageEntity } from "~/components/entities/page.entity";
 import { SortOrder } from "~/components/utils/types";
 import { DatabaseService } from "~/shared/database.service";
 import { PaginationService } from "~/shared/pagination.service";
-import { CreateWorkoutProgressionDto } from "./dto/create-workout-progression.dto";
 import { SortWorkoutProgressionDto } from "./dto/sort-workout-progression.dto";
 import { WorkoutProgressionWhere } from "./entities/workout-progression-where.type";
 import { WorkoutProgressionEntity } from "./entities/workout-progression.entity";
@@ -15,9 +14,11 @@ export class WorkoutProgressionsService {
   constructor(
     private db: DatabaseService,
     private paginationService: PaginationService,
-  ) { }
+  ) {}
 
-  async create({ workoutId }: CreateWorkoutProgressionDto) {
+  async create(workoutId: number, userId: number) {
+    await this.workoutExistsGuard(workoutId, userId);
+
     const workoutProgression = await this.db.workoutProgression.create({
       data: { workoutId },
     });
@@ -33,7 +34,7 @@ export class WorkoutProgressionsService {
       workoutId,
     };
 
-    const orderBy = sortBy ? { [sortBy]: order || SortOrder.ASC } : { name: order || SortOrder.ASC };
+    const orderBy = sortBy ? { [sortBy]: order || SortOrder.ASC } : { createdAt: order || SortOrder.DESC};
 
     return this.paginationService.paginate<WorkoutProgression, "WorkoutProgression", WorkoutProgressionEntity>({
       modelName: "WorkoutProgression",
@@ -56,6 +57,18 @@ export class WorkoutProgressionsService {
     await this.db.workoutProgression.delete({
       where: { id },
     });
+  }
+
+  private async workoutExistsGuard(id: number, userId: number) {
+    const workout = await this.db.workout.findUnique({
+      where: { id, userId },
+    });
+
+    if (!workout) {
+      throw new NotFoundException("workout not found");
+    }
+
+    return workout;
   }
 
   private async workoutProgressionExistsGuard(id: number) {

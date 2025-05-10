@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from "@nestjs/common";
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, HttpCode } from "@nestjs/common";
 import { WorkoutsService } from "./workouts.service";
 import { CreateWorkoutDto } from "./dtos/create-workout.dto";
 import { UpdateWorkoutDto } from "./dtos/update-workout.dto";
@@ -34,6 +34,7 @@ export class WorkoutsController {
   }
 
   @Delete(":id")
+  @HttpCode(204)
   remove(@Param("id") id: string, @GetUser("id") userId: number) {
     return this.workoutsService.remove(+id, userId);
   }
