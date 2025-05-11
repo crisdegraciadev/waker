@@ -1,11 +1,11 @@
 import { INestApplication } from "@nestjs/common";
 import * as request from "supertest";
 import { App } from "supertest/types";
+import { SharedModule } from "~/shared/shared.module";
 import { UsersModule } from "../src/api/users/users.module";
-import resetDb from "./helpers/reset-db";
 import { createTestApp } from "./config/test-app.factory";
 import { CREATE_USER_DTO_1 } from "./fixtures/users";
-import { SharedModule } from "~/shared/shared.module";
+import resetDb from "./helpers/reset-db";
 
 describe("UsersController (e2e)", () => {
   let app: INestApplication<App>;

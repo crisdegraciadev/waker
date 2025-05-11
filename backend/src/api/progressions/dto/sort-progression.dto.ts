@@ -1,7 +1,7 @@
 import { IsEnum, IsOptional } from "class-validator";
 import { SortOrder } from "~/components/utils/types";
 
-export class SortWorkoutProgressionDto {
+export class SortProgressionDto {
   @IsEnum(["createdAt"])
   @IsOptional()
   sortBy?: "createdAt";

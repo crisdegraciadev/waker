@@ -14,11 +14,12 @@ datasource db {
 }
 
 model User {
-  id           Int        @id @default(autoincrement())
-  email        String     @unique
+  id           Int    @id @default(autoincrement())
+  email        String @unique
   passwordHash String
-  exercises    Exercise[]
-  workouts     Workout[]
+
+  exercises Exercise[]
+  workouts  Workout[]
 }
 
 model Exercise {
@@ -28,6 +29,7 @@ model Exercise {
   type       ExerciseType       @default(WEIGHT)
   user       User               @relation(fields: [userId], references: [id])
   userId     Int
+  activities Activity[]
   createdAt  DateTime           @default(now())
 
   @@unique([userId, name], name: "exerciseIdentifier")
@@ -47,13 +49,13 @@ enum ExerciseType {
 }
 
 model Workout {
-  id                  Int                  @id @default(autoincrement())
-  name                String
-  type                WorkoutType          @default(WEIGHTS)
-  user                User                 @relation(fields: [userId], references: [id])
-  userId              Int
-  createdAt           DateTime             @default(now())
-  workoutProgressions WorkoutProgression[]
+  id           Int           @id @default(autoincrement())
+  name         String
+  type         WorkoutType   @default(WEIGHTS)
+  user         User          @relation(fields: [userId], references: [id])
+  userId       Int
+  progressions Progression[]
+  createdAt    DateTime      @default(now())
 
   @@unique([userId, name], name: "workoutIdentifier")
 }
@@ -67,9 +69,29 @@ enum WorkoutType {
   HIIT
 }
 
-model WorkoutProgression {
-  id        Int      @id @default(autoincrement())
-  workout   Workout  @relation(fields: [workoutId], references: [id])
-  workoutId Int
-  createdAt DateTime @default(now())
+model Progression {
+  id         Int        @id @default(autoincrement())
+  workout    Workout    @relation(fields: [workoutId], references: [id])
+  workoutId  Int
+  activities Activity[]
+  createdAt  DateTime   @default(now())
+}
+
+model Activity {
+  id            Int                  @id @default(autoincrement())
+  order         Int
+  sets          Int
+  reps          Int
+  weight        Int?
+  improvement   ActivityImprovement?
+  exercise      Exercise             @relation(fields: [exerciseId], references: [id])
+  exerciseId    Int
+  progression   Progression          @relation(fields: [progressionId], references: [id])
+  progressionId Int
+}
+
+enum ActivityImprovement {
+  DECREASE
+  MAINTAIN
+  INCREASE
 }

@@ -1,25 +1,25 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { INestApplication } from "@nestjs/common";
 import { App } from "supertest/types";
-import { WorkoutProgressionsModule } from "~/api/workout-progressions/workout-progressions.module";
+import { ProgressionsModule } from "~/api/progressions/progressions.module";
 import { WorkoutsModule } from "~/api/workouts/workouts.module";
 import { SharedModule } from "~/shared/shared.module";
 import { UsersModule } from "../src/api/users/users.module";
 import { createTestApp } from "./config/test-app.factory";
 import { CREATE_USER_DTO_1 } from "./fixtures/users";
-import { CREATE_WORKOUT_DTO_1, CREATE_WORKOUT_DTO_2 } from "./fixtures/workout";
+import { CREATE_WORKOUT_DTO_1 } from "./fixtures/workouts";
 import authRequest from "./helpers/auth-request";
 import generateJwt from "./helpers/gen-jwt";
 import resetDb from "./helpers/reset-db";
 
-describe("WorkoutProgressionsController (e2e)", () => {
+describe("ProgressionsController (e2e)", () => {
   let app: INestApplication<App>;
   let api: App;
   let authToken: string;
   let WORKOUT_ID: number;
 
   beforeEach(async () => {
-    app = await createTestApp(SharedModule, UsersModule, WorkoutsModule, WorkoutProgressionsModule);
+    app = await createTestApp(SharedModule, UsersModule, WorkoutsModule, ProgressionsModule);
     api = app.getHttpServer();
     await resetDb();
 
@@ -35,7 +35,7 @@ describe("WorkoutProgressionsController (e2e)", () => {
   });
 
   describe("POST /workouts/:workoutId/progressions", () => {
-    it("should return 201 OK and create a workout progression", async () => {
+    it("should return 201 OK and create a progression", async () => {
       const expectedFields = ["id", "workoutId", "createdAt"];
 
       const { post } = authRequest(api, authToken);
@@ -78,7 +78,7 @@ describe("WorkoutProgressionsController (e2e)", () => {
   });
 
   describe("GET /workouts/:workoutId/progressions/:id", () => {
-    it("should return 200 OK and get a workout progression", async () => {
+    it("should return 200 OK and get a progression", async () => {
       const { post, get } = authRequest(api, authToken);
 
       const { body: progression } = await post(`/workouts/${WORKOUT_ID}/progressions`);
@@ -101,12 +101,12 @@ describe("WorkoutProgressionsController (e2e)", () => {
       expect(body.message).toBe("Unauthorized");
     });
 
-    it("should return 404 NOT FOUND if workout progression does not exist", async () => {
+    it("should return 404 NOT FOUND if progression does not exist", async () => {
       const { get } = authRequest(api, authToken);
       const { body, statusCode } = await get(`/workouts/${WORKOUT_ID}/progressions/999`);
 
       expect(statusCode).toBe(404);
-      expect(body.message).toBe("workout-progression not found");
+      expect(body.message).toBe("progression not found");
     });
   });
 
@@ -119,7 +119,7 @@ describe("WorkoutProgressionsController (e2e)", () => {
       await post(`/workouts/${WORKOUT_ID}/progressions`);
     }, 15_000);
 
-    it("should return 200 OK and get all workout progressions with pagination", async () => {
+    it("should return 200 OK and get all progressions with pagination", async () => {
       const { get } = authRequest(api, authToken);
 
       const { body: firstPageBody, statusCode: firstPageStatusCode } = await get(`/workouts/${WORKOUT_ID}/progressions?page=1&limit=2`);
@@ -191,7 +191,7 @@ describe("WorkoutProgressionsController (e2e)", () => {
   });
 
   describe("DELETE /workouts/:workoutId/progressions/:id", () => {
-    it("should return 204 NO CONTENT and delete a workout progression", async () => {
+    it("should return 204 NO CONTENT and delete a progression", async () => {
       const { post, del, get } = authRequest(api, authToken);
       const { body: progression } = await post(`/workouts/${WORKOUT_ID}/progressions`);
       const { statusCode } = await del(`/workouts/${WORKOUT_ID}/progressions/${progression.id}`);
@@ -211,12 +211,12 @@ describe("WorkoutProgressionsController (e2e)", () => {
       expect(body.message).toBe("Unauthorized");
     });
 
-    it("should return 404 NOT FOUND if workout progression does not exist", async () => {
+    it("should return 404 NOT FOUND if progression does not exist", async () => {
       const { del } = authRequest(api, authToken);
       const { body, statusCode } = await del(`/workouts/${WORKOUT_ID}/progressions/999`);
 
       expect(statusCode).toBe(404);
-      expect(body.message).toBe("workout-progression not found");
+      expect(body.message).toBe("progression not found");
     });
   });
 });

@@ -1,12 +1,9 @@
 import { Injectable } from "@nestjs/common";
-import { Prisma } from "@prisma/client";
-import { DatabaseService } from "./database.service";
 import { PageEntity } from "~/components/entities/page.entity";
+import { ModelNames, PrismaFindManyArgs } from "../types";
+import { DatabaseService } from "./database.service";
 
-export type ModelNames = (typeof Prisma.ModelName)[keyof typeof Prisma.ModelName];
 
-type PrismaOperations<ModelName extends ModelNames> = Prisma.TypeMap["model"][ModelName]["operations"];
-type PrismaFindManyArgs<ModelName extends ModelNames> = PrismaOperations<ModelName>["findMany"]["args"];
 
 type PaginationOptions<Model, ModelName extends ModelNames, Entity> = {
   modelName: ModelName;

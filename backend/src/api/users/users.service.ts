@@ -2,7 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from "@nestjs/common
 import { CreateUserDto } from "./dtos/create-user.dto";
 import { UserEntity } from "./entities/user.entity";
 import * as bcrypt from "bcrypt";
-import { DatabaseService } from "../../shared/database.service";
+import { DatabaseService } from "../../shared/services/database.service";
 
 @Injectable()
 export class UsersService {

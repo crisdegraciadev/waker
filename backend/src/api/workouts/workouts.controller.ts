@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, HttpCode } from "@nestjs/common";
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, HttpCode, ParseIntPipe } from "@nestjs/common";
 import { WorkoutsService } from "./workouts.service";
 import { CreateWorkoutDto } from "./dtos/create-workout.dto";
 import { UpdateWorkoutDto } from "./dtos/update-workout.dto";
@@ -24,18 +24,18 @@ export class WorkoutsController {
   }
 
   @Get(":id")
-  findOne(@Param("id") id: string, @GetUser("id") userId: number) {
-    return this.workoutsService.findOne(+id, userId);
+  findOne(@Param("id", ParseIntPipe) id: number, @GetUser("id") userId: number) {
+    return this.workoutsService.findOne(id, userId);
   }
 
   @Patch(":id")
-  update(@Param("id") id: string, @Body() updateWorkoutDto: UpdateWorkoutDto, @GetUser("id") userId: number) {
-    return this.workoutsService.update(+id, updateWorkoutDto, userId);
+  update(@Param("id", ParseIntPipe) id: number, @Body() updateWorkoutDto: UpdateWorkoutDto, @GetUser("id") userId: number) {
+    return this.workoutsService.update(id, updateWorkoutDto, userId);
   }
 
   @Delete(":id")
   @HttpCode(204)
-  remove(@Param("id") id: string, @GetUser("id") userId: number) {
-    return this.workoutsService.remove(+id, userId);
+  remove(@Param("id", ParseIntPipe) id: number, @GetUser("id") userId: number) {
+    return this.workoutsService.remove(id, userId);
   }
 }

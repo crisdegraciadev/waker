@@ -2,8 +2,8 @@ import { ConflictException, Injectable, NotFoundException } from "@nestjs/common
 import { Exercise, Prisma } from "@prisma/client";
 import { PaginationDto } from "~/components/dtos/pagination.dto";
 import { PageEntity } from "~/components/entities/page.entity";
-import { DatabaseService } from "~/shared/database.service";
-import { PaginationService } from "~/shared/pagination.service";
+import { DatabaseService } from "~/shared/services/database.service";
+import { PaginationService } from "~/shared/services/pagination.service";
 import { CreateExerciseDto } from "./dtos/create-exercise.dto";
 import { FilterExerciseDto } from "./dtos/filter-exercise.dto";
 import { UpdateExerciseDto } from "./dtos/update-exercise.dto";

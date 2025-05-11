@@ -1,15 +1,15 @@
 import { INestApplication } from "@nestjs/common";
 import { App } from "supertest/types";
 import { WorkoutsModule } from "~/api/workouts/workouts.module";
+import { SharedModule } from "~/shared/shared.module";
 import { UsersModule } from "../src/api/users/users.module";
 import { createTestApp } from "./config/test-app.factory";
-import { CREATE_WORKOUT_DTO_1, CREATE_WORKOUT_DTO_2, CREATE_WORKOUT_DTO_3, CREATE_WORKOUT_DTO_4 } from "./fixtures/workout";
 import { CREATE_USER_DTO_1, CREATE_USER_DTO_2 } from "./fixtures/users";
+import { CREATE_WORKOUT_DTO_1, CREATE_WORKOUT_DTO_2, CREATE_WORKOUT_DTO_3, CREATE_WORKOUT_DTO_4 } from "./fixtures/workouts";
 import authRequest from "./helpers/auth-request";
 import extractUserIdFromToken from "./helpers/extract-user-from-token";
 import generateJwt from "./helpers/gen-jwt";
 import resetDb from "./helpers/reset-db";
-import { SharedModule } from "~/shared/shared.module";
 
 describe("WorkoutsController (e2e)", () => {
   let app: INestApplication<App>;
