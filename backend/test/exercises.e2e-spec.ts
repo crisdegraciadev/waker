@@ -376,50 +376,6 @@ describe("ExercisesController (e2e)", () => {
     });
   });
 
-  describe("DELETE /exercises/:id", () => {
-    it("should return 204 NO CONTENT if exercise is deleted", async () => {
-      const { post, del } = authRequest(api, authToken);
-      const { body: exercise } = await post("/exercises").send(CREATE_EXERCISE_DTO_1);
-
-      const { statusCode } = await del(`/exercises/${exercise.id}`);
-
-      expect(statusCode).toBe(204);
-
-      const { get } = authRequest(api, authToken);
-      const { statusCode: getStatusCode } = await get(`/exercises/${exercise.id}`);
-      expect(getStatusCode).toBe(404);
-    });
-
-    it("should return 401 UNAUTHORIZED if user is not authenticated", async () => {
-      const { del } = authRequest(api, "");
-      const { body, statusCode } = await del("/exercises/1");
-
-      expect(statusCode).toBe(401);
-      expect(body.message).toBe("Unauthorized");
-    });
-
-    it("should return 404 NOT FOUND if exercise does not exist", async () => {
-      const { del } = authRequest(api, authToken);
-      const { body, statusCode } = await del("/exercises/999");
-
-      expect(statusCode).toBe(404);
-      expect(body.message).toBe("exercise not found");
-    });
-
-    it("should return 404 NOT FOUND if exercise does not belong to user", async () => {
-      const reqUser1 = authRequest(api, authToken);
-      const { body: user1Exercise } = await reqUser1.post("/exercises").send(CREATE_EXERCISE_DTO_1);
-
-      authToken = await generateJwt(api, CREATE_USER_DTO_2);
-      const reqUser2 = authRequest(api, authToken);
-
-      const { body, statusCode } = await reqUser2.del(`/exercises/${user1Exercise.id}`);
-
-      expect(statusCode).toBe(404);
-      expect(body.message).toBe("exercise not found");
-    });
-  });
-
   describe("PATCH /exercises/:id", () => {
     it("should return 200 OK if exercise is updated", async () => {
       const { post, patch } = authRequest(api, authToken);
@@ -521,6 +477,50 @@ describe("ExercisesController (e2e)", () => {
 
       expect(statusCode).toBe(409);
       expect(body.message).toBe("name is already in use");
+    });
+  });
+
+  describe("DELETE /exercises/:id", () => {
+    it("should return 204 NO CONTENT if exercise is deleted", async () => {
+      const { post, del } = authRequest(api, authToken);
+      const { body: exercise } = await post("/exercises").send(CREATE_EXERCISE_DTO_1);
+
+      const { statusCode } = await del(`/exercises/${exercise.id}`);
+
+      expect(statusCode).toBe(204);
+
+      const { get } = authRequest(api, authToken);
+      const { statusCode: getStatusCode } = await get(`/exercises/${exercise.id}`);
+      expect(getStatusCode).toBe(404);
+    });
+
+    it("should return 401 UNAUTHORIZED if user is not authenticated", async () => {
+      const { del } = authRequest(api, "");
+      const { body, statusCode } = await del("/exercises/1");
+
+      expect(statusCode).toBe(401);
+      expect(body.message).toBe("Unauthorized");
+    });
+
+    it("should return 404 NOT FOUND if exercise does not exist", async () => {
+      const { del } = authRequest(api, authToken);
+      const { body, statusCode } = await del("/exercises/999");
+
+      expect(statusCode).toBe(404);
+      expect(body.message).toBe("exercise not found");
+    });
+
+    it("should return 404 NOT FOUND if exercise does not belong to user", async () => {
+      const reqUser1 = authRequest(api, authToken);
+      const { body: user1Exercise } = await reqUser1.post("/exercises").send(CREATE_EXERCISE_DTO_1);
+
+      authToken = await generateJwt(api, CREATE_USER_DTO_2);
+      const reqUser2 = authRequest(api, authToken);
+
+      const { body, statusCode } = await reqUser2.del(`/exercises/${user1Exercise.id}`);
+
+      expect(statusCode).toBe(404);
+      expect(body.message).toBe("exercise not found");
     });
   });
 });

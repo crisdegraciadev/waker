@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../auth/guards/jwt.guard";
 import { ActivitiesService } from "./activities.service";
 import { CreateActivityDto } from "./dto/create-activity.dto";
@@ -8,7 +8,7 @@ import { GetUser } from "~/components/decorators/get-user.decorator";
 @Controller("workouts/:workoutId/progressions/:progressionId/activities")
 @UseGuards(JwtAuthGuard)
 export class ActivitiesController {
-  constructor(private readonly activitiesService: ActivitiesService) {}
+  constructor(private readonly activitiesService: ActivitiesService) { }
 
   @Post()
   create(
@@ -21,22 +21,43 @@ export class ActivitiesController {
   }
 
   @Get()
-  findAll() {
-    return this.activitiesService.findAll();
+  findAll(
+    @Param("workoutId", ParseIntPipe) workoutId: number,
+    @Param("progressionId", ParseIntPipe) progressionId: number,
+    @GetUser("id") userId: number,
+  ) {
+    return this.activitiesService.findAll(workoutId, progressionId, userId);
   }
 
   @Get(":id")
-  findOne(@Param("id") id: string) {
-    return this.activitiesService.findOne(+id);
+  findOne(
+    @Param("id", ParseIntPipe) id: number,
+    @Param("workoutId", ParseIntPipe) workoutId: number,
+    @Param("progressionId", ParseIntPipe) progressionId: number,
+    @GetUser("id") userId: number,
+  ) {
+    return this.activitiesService.findOne(id, workoutId, progressionId, userId);
   }
 
   @Patch(":id")
-  update(@Param("id") id: string, @Body() updateActivityDto: UpdateActivityDto) {
-    return this.activitiesService.update(+id, updateActivityDto);
+  update(
+    @Param("id", ParseIntPipe) id: number,
+    @Param("workoutId", ParseIntPipe) workoutId: number,
+    @Param("progressionId", ParseIntPipe) progressionId: number,
+    @Body() updateActivityDto: UpdateActivityDto,
+    @GetUser("id") userId: number,
+  ) {
+    return this.activitiesService.update(id, updateActivityDto, workoutId, progressionId, userId);
   }
 
   @Delete(":id")
-  remove(@Param("id") id: string) {
-    return this.activitiesService.remove(+id);
+  @HttpCode(204)
+  remove(
+    @Param("id", ParseIntPipe) id: number,
+    @Param("workoutId", ParseIntPipe) workoutId: number,
+    @Param("progressionId", ParseIntPipe) progressionId: number,
+    @GetUser("id") userId: number,
+  ) {
+    return this.activitiesService.remove(id, workoutId, progressionId, userId);
   }
 }
