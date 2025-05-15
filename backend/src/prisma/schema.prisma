@@ -70,11 +70,12 @@ enum WorkoutType {
 }
 
 model Progression {
-  id         Int        @id @default(autoincrement())
-  workout    Workout    @relation(fields: [workoutId], references: [id])
-  workoutId  Int
-  activities Activity[]
-  createdAt  DateTime   @default(now())
+  id               Int        @id @default(autoincrement())
+  workout          Workout    @relation(fields: [workoutId], references: [id])
+  workoutId        Int
+  activities       Activity[]
+  activitiesOrder Json
+  createdAt        DateTime   @default(now())
 }
 
 model Activity {

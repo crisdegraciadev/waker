@@ -270,14 +270,17 @@ describe("ActivitiesController (e2e)", () => {
   describe("GET /workouts/:workoutId/progressions/:progressionId/activities", () => {
     beforeEach(async () => {
       const { post } = authRequest(api, authToken);
+
       await post(`/workouts/${WORKOUT_ID}/progressions/${PROGRESSION_ID}/activities`).send({
         ...CREATE_ACTIVITY_DTO_1,
         exerciseId: EXERCISE_ID,
       });
+
       await post(`/workouts/${WORKOUT_ID}/progressions/${PROGRESSION_ID}/activities`).send({
         ...CREATE_ACTIVITY_DTO_1,
         exerciseId: EXERCISE_ID,
       });
+
       await post(`/workouts/${WORKOUT_ID}/progressions/${PROGRESSION_ID}/activities`).send({
         ...CREATE_ACTIVITY_DTO_1,
         exerciseId: EXERCISE_ID,

@@ -1,33 +1,42 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { INestApplication } from "@nestjs/common";
 import { App } from "supertest/types";
+import { ActivitiesModule } from "~/api/activities/activities.module";
 import { ProgressionsModule } from "~/api/progressions/progressions.module";
 import { WorkoutsModule } from "~/api/workouts/workouts.module";
 import { SharedModule } from "~/shared/shared.module";
 import { UsersModule } from "../src/api/users/users.module";
 import { createTestApp } from "./config/test-app.factory";
-import { CREATE_USER_DTO_1 } from "./fixtures/users";
+import { CREATE_ACTIVITY_DTO_1 } from "./fixtures/activities";
+import { CREATE_EXERCISE_DTO_1 } from "./fixtures/exercises";
+import { CREATE_USER_DTO_1, CREATE_USER_DTO_2 } from "./fixtures/users";
 import { CREATE_WORKOUT_DTO_1 } from "./fixtures/workouts";
 import authRequest from "./helpers/auth-request";
 import generateJwt from "./helpers/gen-jwt";
 import resetDb from "./helpers/reset-db";
+import { ExercisesModule } from "~/api/exercises/exercises.module";
 
 describe("ProgressionsController (e2e)", () => {
   let app: INestApplication<App>;
   let api: App;
   let authToken: string;
   let WORKOUT_ID: number;
+  let EXERCISE_ID: number;
 
   beforeEach(async () => {
-    app = await createTestApp(SharedModule, UsersModule, WorkoutsModule, ProgressionsModule);
+    app = await createTestApp(SharedModule, UsersModule, WorkoutsModule, ActivitiesModule, ExercisesModule, ProgressionsModule);
     api = app.getHttpServer();
     await resetDb();
 
     authToken = await generateJwt(api, CREATE_USER_DTO_1);
 
     const { post } = authRequest(api, authToken);
+
     const { body } = await post("/workouts").send(CREATE_WORKOUT_DTO_1);
     WORKOUT_ID = body.id;
+
+    const { body: exerciseBody } = await post(`/exercises`).send(CREATE_EXERCISE_DTO_1);
+    EXERCISE_ID = exerciseBody.id;
   });
 
   afterEach(async () => {
@@ -217,6 +226,140 @@ describe("ProgressionsController (e2e)", () => {
 
       expect(statusCode).toBe(404);
       expect(body.message).toBe("progression not found");
+    });
+  });
+
+  describe("PATCH /workouts/:workoutId/progressions/:id", () => {
+    let PROGRESSION: any;
+
+    beforeEach(async () => {
+      const { post } = authRequest(api, authToken);
+
+      const { body: progressionBody } = await post(`/workouts/${WORKOUT_ID}/progressions`);
+
+      PROGRESSION = progressionBody;
+
+      await post(`/workouts/${WORKOUT_ID}/progressions/${PROGRESSION.id}/activities`).send({
+        ...CREATE_ACTIVITY_DTO_1,
+        exerciseId: EXERCISE_ID,
+      });
+
+      await post(`/workouts/${WORKOUT_ID}/progressions/${PROGRESSION.id}/activities`).send({
+        ...CREATE_ACTIVITY_DTO_1,
+        exerciseId: EXERCISE_ID,
+      });
+
+      await post(`/workouts/${WORKOUT_ID}/progressions/${PROGRESSION.id}/activities`).send({
+        ...CREATE_ACTIVITY_DTO_1,
+        exerciseId: EXERCISE_ID,
+      });
+    });
+
+    it("should return 200 OK and update a progression", async () => {
+      const { patch } = authRequest(api, authToken);
+
+      const updateDto = {
+        activitiesOrder: [1, 2, 3],
+      };
+
+      const { body, statusCode } = await patch(`/workouts/${WORKOUT_ID}/progressions/${PROGRESSION.id}`).send(updateDto);
+
+      expect(statusCode).toBe(200);
+      expect(body).toMatchObject({
+        id: PROGRESSION.id,
+        workoutId: PROGRESSION.workoutId,
+        activitiesOrder: updateDto.activitiesOrder,
+        createdAt: PROGRESSION.createdAt,
+      });
+    });
+
+    it("should return 400 BAD REQUEST if workoutId is not a number", async () => {
+      const { patch } = authRequest(api, authToken);
+
+      const updateDto = {
+        activitiesOrder: [1, 2, 3],
+      };
+
+      const { body, statusCode } = await patch(`/workouts/abc/progressions/1`).send(updateDto);
+
+      expect(statusCode).toBe(400);
+      expect(body.message).toBe("Validation failed (numeric string is expected)");
+    });
+
+    it("should return 400 BAD REQUEST if progressionId is not a number", async () => {
+      const { patch } = authRequest(api, authToken);
+
+      const updateDto = {
+        activitiesOrder: [1, 2, 3],
+      };
+
+      const { body, statusCode } = await patch(`/workouts/${WORKOUT_ID}/progressions/abc`).send(updateDto);
+
+      expect(statusCode).toBe(400);
+      expect(body.message).toBe("Validation failed (numeric string is expected)");
+    });
+
+    it("should return 400 BAD REQUEST if activitiesOrder length does not match activities length", async () => {
+      const { patch } = authRequest(api, authToken);
+
+      const updateDto = {
+        activitiesOrder: [1, 2, 3, 4],
+      };
+
+      const { body, statusCode } = await patch(`/workouts/${WORKOUT_ID}/progressions/${PROGRESSION.id}`).send(updateDto);
+
+      expect(statusCode).toBe(400);
+      expect(body.message).toBe("activities length missmatch");
+    });
+
+    it("should return 401 UNAUTHORIZED if user is not authenticated", async () => {
+      const { patch } = authRequest(api, "");
+      const { body, statusCode } = await patch(`/workouts/${WORKOUT_ID}/progressions/1`).send({});
+
+      expect(statusCode).toBe(401);
+      expect(body.message).toBe("Unauthorized");
+    });
+
+    it("should return 404 NOT FOUND if workout does not exist", async () => {
+      const { patch } = authRequest(api, authToken);
+
+      const updateDto = {
+        activitiesOrder: [1, 2, 3],
+      };
+
+      const { body, statusCode } = await patch(`/workouts/999/progressions/1`).send(updateDto);
+
+      expect(statusCode).toBe(404);
+      expect(body.message).toBe("workout not found");
+    });
+
+    it("should return 404 NOT FOUND if progression does not exist", async () => {
+      const { patch } = authRequest(api, authToken);
+
+      const updateDto = {
+        activitiesOrder: [1, 2, 3],
+      };
+
+      const { body, statusCode } = await patch(`/workouts/${WORKOUT_ID}/progressions/999`).send(updateDto);
+
+      expect(statusCode).toBe(404);
+      expect(body.message).toBe("progression not found");
+    });
+
+    it("should return 404 NOT FOUND if progression does not belong to user", async () => {
+      const reqUser1 = authRequest(api, authToken);
+      const { body: user1Progression } = await reqUser1.post(`/workouts/${WORKOUT_ID}/progressions`);
+
+      authToken = await generateJwt(api, CREATE_USER_DTO_2);
+      const reqUser2 = authRequest(api, authToken);
+
+      const updateDto = {
+        activitiesOrder: [1, 2, 3],
+      };
+
+      const { statusCode } = await reqUser2.patch(`/workouts/${WORKOUT_ID}/progressions/${user1Progression.id}`).send(updateDto);
+
+      expect(statusCode).toBe(404);
     });
   });
 });
