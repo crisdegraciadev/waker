@@ -17,11 +17,6 @@ export class CreateActivityDto {
   @IsOptional()
   weight?: number;
 
-  @IsNumber()
-  @IsPositive()
-  @IsNotEmpty()
-  order: number;
-
   @IsEnum(ActivityImprovement)
   @IsOptional()
   improvement?: ActivityImprovement;

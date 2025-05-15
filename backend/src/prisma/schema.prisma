@@ -79,7 +79,6 @@ model Progression {
 
 model Activity {
   id            Int                  @id @default(autoincrement())
-  order         Int
   sets          Int
   reps          Int
   weight        Int?

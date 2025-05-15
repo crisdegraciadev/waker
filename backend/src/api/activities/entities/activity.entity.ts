@@ -3,7 +3,6 @@ import { Activity, ActivityImprovement } from "@prisma/client";
 export class ActivityEntity implements Activity {
   id: number;
 
-  order: number;
 
   sets: number;
 

@@ -33,7 +33,6 @@ export class ActivitiesService {
 
     const activities = await this.db.activity.findMany({
       where: { progressionId },
-      orderBy: { order: "asc" },
     });
 
     return activities.map((a) => new ActivityEntity(a));

@@ -48,7 +48,7 @@ describe("ActivitiesController (e2e)", () => {
 
   describe("POST /workouts/:workoutId/progressions/:progressionId/activities", () => {
     it("should return 201 OK and create an activity", async () => {
-      const expectedFields = ["id", "sets", "reps", "order", "progressionId", "exerciseId"];
+      const expectedFields = ["id", "sets", "reps", "progressionId", "exerciseId"];
 
       const { post } = authRequest(api, authToken);
       const { body, statusCode } = await post(`/workouts/${WORKOUT_ID}/progressions/${PROGRESSION_ID}/activities`).send({
@@ -69,14 +69,13 @@ describe("ActivitiesController (e2e)", () => {
 
       expect(body.sets).toBe(CREATE_ACTIVITY_DTO_1.sets);
       expect(body.reps).toBe(CREATE_ACTIVITY_DTO_1.reps);
-      expect(body.order).toBe(CREATE_ACTIVITY_DTO_1.order);
 
       expect(body.improvement).toBeNull();
       expect(body.weight).toBeNull();
     });
 
     it("should return 201 OK and create an activity with weight", async () => {
-      const expectedFields = ["id", "sets", "reps", "order", "progressionId", "exerciseId", "weight"];
+      const expectedFields = ["id", "sets", "reps", "progressionId", "exerciseId", "weight"];
 
       const { post } = authRequest(api, authToken);
       const { body, statusCode } = await post(`/workouts/${WORKOUT_ID}/progressions/${PROGRESSION_ID}/activities`).send({
@@ -96,7 +95,6 @@ describe("ActivitiesController (e2e)", () => {
       expect(body.progressionId).toBe(PROGRESSION_ID);
       expect(body.sets).toBe(CREATE_ACTIVITY_DTO_1.sets);
       expect(body.reps).toBe(CREATE_ACTIVITY_DTO_1.reps);
-      expect(body.order).toBe(CREATE_ACTIVITY_DTO_1.order);
       expect(body.weight).toBe(20);
       expect(body.improvement).toBeNull();
     });
@@ -138,11 +136,7 @@ describe("ActivitiesController (e2e)", () => {
           message: "reps should not be empty",
         },
         {
-          payload: { exerciseId: EXERCISE_ID, sets: 3, reps: 10 },
-          message: "order should not be empty",
-        },
-        {
-          payload: { exerciseId: EXERCISE_ID, sets: 3, reps: 10, order: 1, weight: -1 },
+          payload: { exerciseId: EXERCISE_ID, sets: 3, reps: 10, weight: -1 },
           message: "weight must be a positive number",
         },
       ];
@@ -196,7 +190,6 @@ describe("ActivitiesController (e2e)", () => {
         progressionId: activity.progressionId,
         sets: activity.sets,
         reps: activity.reps,
-        order: activity.order,
         weight: activity.weight,
         improvement: activity.improvement,
       });
@@ -280,41 +273,23 @@ describe("ActivitiesController (e2e)", () => {
       await post(`/workouts/${WORKOUT_ID}/progressions/${PROGRESSION_ID}/activities`).send({
         ...CREATE_ACTIVITY_DTO_1,
         exerciseId: EXERCISE_ID,
-        order: 2,
       });
       await post(`/workouts/${WORKOUT_ID}/progressions/${PROGRESSION_ID}/activities`).send({
         ...CREATE_ACTIVITY_DTO_1,
         exerciseId: EXERCISE_ID,
-        order: 1,
       });
       await post(`/workouts/${WORKOUT_ID}/progressions/${PROGRESSION_ID}/activities`).send({
         ...CREATE_ACTIVITY_DTO_1,
         exerciseId: EXERCISE_ID,
-        order: 3,
       });
     });
 
-    it("should return 200 OK and get an array of activities of a progression ordered by order field", async () => {
+    it("should return 200 OK and get an array of activities of a progression", async () => {
       const { get } = authRequest(api, authToken);
       const { body, statusCode } = await get(`/workouts/${WORKOUT_ID}/progressions/${PROGRESSION_ID}/activities`);
 
       expect(statusCode).toBe(200);
       expect(body).toHaveLength(3);
-
-      const [activity1, activity2, activity3] = body;
-
-      expect(activity1.order).toBe(1);
-      expect(activity2.order).toBe(2);
-      expect(activity3.order).toBe(3);
-
-      expect(activity1).toMatchObject({
-        exerciseId: EXERCISE_ID,
-        progressionId: PROGRESSION_ID,
-        sets: CREATE_ACTIVITY_DTO_1.sets,
-        reps: CREATE_ACTIVITY_DTO_1.reps,
-        weight: null,
-        improvement: null,
-      });
     });
 
     it("should return 200 OK and get an empty array of activities", async () => {
@@ -379,7 +354,6 @@ describe("ActivitiesController (e2e)", () => {
       const updateDto = {
         sets: 4,
         reps: 12,
-        order: 2,
         weight: 25,
       };
 
@@ -392,7 +366,6 @@ describe("ActivitiesController (e2e)", () => {
         progressionId: activity.progressionId,
         sets: updateDto.sets,
         reps: updateDto.reps,
-        order: updateDto.order,
         weight: updateDto.weight,
         improvement: null,
       });
@@ -418,7 +391,6 @@ describe("ActivitiesController (e2e)", () => {
         progressionId: activity.progressionId,
         sets: updateDto.sets,
         reps: activity.reps,
-        order: activity.order,
         weight: activity.weight,
         improvement: activity.improvement,
       });
@@ -444,7 +416,6 @@ describe("ActivitiesController (e2e)", () => {
         progressionId: activity.progressionId,
         sets: activity.sets,
         reps: activity.reps,
-        order: activity.order,
         weight: activity.weight,
         improvement: activity.improvement,
       });
@@ -468,7 +439,6 @@ describe("ActivitiesController (e2e)", () => {
         progressionId: activity.progressionId,
         sets: activity.sets,
         reps: activity.reps,
-        order: activity.order,
         weight: activity.weight,
         improvement: "INCREASE",
       });
@@ -513,10 +483,6 @@ describe("ActivitiesController (e2e)", () => {
         {
           payload: { reps: -1 },
           message: "reps must be a positive number",
-        },
-        {
-          payload: { order: -1 },
-          message: "order must be a positive number",
         },
         {
           payload: { weight: -1 },
