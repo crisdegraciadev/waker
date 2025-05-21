@@ -2,15 +2,12 @@ import { Button } from "@/core/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/core/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/core/components/ui/form";
 import { Input } from "@/core/components/ui/input";
+import { LocalStorageKeys } from "@/core/constants/local-storage-keys";
 import { useLoginMutation } from "@/core/requests/mutations/use-login-mutation";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useLocalStorage } from "@uidotdev/usehooks";
-import { LocalStorageKeys } from "@/core/constants/local-storage-keys";
-import { useNavigate } from "react-router";
-import { AppRoutes } from "@/core/constants/app-routes";
-import { useEffect } from "react";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -28,19 +25,11 @@ export function LoginForm() {
     },
   });
 
-  const navigate = useNavigate();
-
-  const [accessToken, setAccessToken] = useLocalStorage<string>(LocalStorageKeys.ACCESS_TOKEN);
+  const [_, setAccessToken] = useLocalStorage<string>(LocalStorageKeys.ACCESS_TOKEN);
 
   const { mutate: login } = useLoginMutation({
     onSuccess: ({ accessToken }) => setAccessToken(accessToken),
   });
-
-  useEffect(() => {
-    if (accessToken) {
-      navigate(AppRoutes.DASHBOARD);
-    }
-  }, [accessToken, navigate]);
 
   function onSubmit(values: FormValues) {
     login({ ...values });
