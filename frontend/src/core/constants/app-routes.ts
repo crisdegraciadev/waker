@@ -1,5 +1,9 @@
 export const AppRoutes = {
-  DASHBOARD: "/",
+  DASHBOARD: "/dashboard",
   LOGIN: "/login",
   REGISTER: "/register",
+  ACCOUNT: "/account",
+  WORKOUTS: "/workouts",
+  EXERCISES: "/exercises",
+  SETTINGS: "/settings",
 };
