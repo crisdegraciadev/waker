@@ -23,11 +23,12 @@ export function RouterProvider() {
         <Route path={AppRoutes.LOGIN} element={<LoginPage />} />
         <Route path={AppRoutes.REGISTER} element={<RegisterPage />} />
         <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<Navigate to={AppRoutes.DASHBOARD} />} />
           <Route path={AppRoutes.DASHBOARD} element={<DashboardPage />} />
           <Route path={AppRoutes.ACCOUNT} element={<AccountPage />} />
           <Route path={AppRoutes.WORKOUTS} element={<WorkoutsPage />} />
           <Route path={AppRoutes.EXERCISES} element={<ExercisesPage />} />
-          <Route path={AppRoutes.SETTINGS} element={<SettingsPage/>} />
+          <Route path={AppRoutes.SETTINGS} element={<SettingsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
