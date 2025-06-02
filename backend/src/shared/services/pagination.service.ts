@@ -3,8 +3,6 @@ import { PageEntity } from "~/components/entities/page.entity";
 import { ModelNames, PrismaFindManyArgs } from "../types";
 import { DatabaseService } from "./database.service";
 
-
-
 type PaginationOptions<Model, ModelName extends ModelNames, Entity> = {
   modelName: ModelName;
   pageNumber: number;
@@ -18,12 +16,12 @@ type PaginationOptions<Model, ModelName extends ModelNames, Entity> = {
 
 @Injectable()
 export class PaginationService {
-  constructor(private db: DatabaseService) {}
+  constructor(private db: DatabaseService) { }
 
   async paginate<Model, ModelName extends ModelNames, Entity>(options: PaginationOptions<Model, ModelName, Entity>) {
     const { pageNumber, limit, modelName, where, orderBy, mapper } = options;
 
-    const skip = (pageNumber - 1) * limit;
+    const skip = pageNumber * limit;
     const take = limit;
 
     const items: Model[] = await this.db[modelName as string].findMany({

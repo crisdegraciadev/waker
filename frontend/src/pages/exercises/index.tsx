@@ -1,4 +1,5 @@
 import { MainLayout } from "@/core/components/layouts/main";
+import { ExerciseDataTable } from "./components/data-table";
 import { ExercisesToolbar } from "./components/toolbar";
 
 export function ExercisesPage() {
@@ -9,6 +10,7 @@ export function ExercisesPage() {
         <p className="text-muted-foreground">Manage your exercises from this view.</p>
       </div>
       <ExercisesToolbar />
+      <ExerciseDataTable />
     </MainLayout>
   );
 }
