@@ -1,7 +1,7 @@
 import type { ExerciseDifficulty } from "./exercise-difficulty.type";
 import type { ExerciseType } from "./exercise-type.type";
 
-export type ExerciseEntity = {
+export type Exercise = {
   id: number;
   name: string;
   difficulty: ExerciseDifficulty;

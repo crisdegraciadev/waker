@@ -1,7 +1,7 @@
 import { ApiRoutes } from "@/core/constants/api-routes";
 import type { ErrorEntity } from "@/core/types/error/error.entity";
 import type { CreateExerciseDto } from "@/core/types/exercises/create-exercise.dto";
-import type { ExerciseEntity } from "@/core/types/exercises/exercises.entity";
+import type { Exercise } from "@/core/types/exercises/exercise";
 import { useMutation, type MutationOptions } from "@tanstack/react-query";
 import { request } from "../request";
 
@@ -13,7 +13,7 @@ function mutationFn(dto: CreateExerciseDto) {
   });
 }
 
-export function useCreateExerciseMutation(mutationOptions?: MutationOptions<ExerciseEntity, ErrorEntity, CreateExerciseDto>) {
+export function useCreateExerciseMutation(mutationOptions?: MutationOptions<Exercise, ErrorEntity, CreateExerciseDto>) {
   return useMutation({
     mutationFn,
     ...mutationOptions,

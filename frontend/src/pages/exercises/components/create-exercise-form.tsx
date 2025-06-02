@@ -7,6 +7,7 @@ import { useCreateExerciseMutation } from "@/core/requests/mutations/use-create-
 import { EXERCISE_DIFFICULTIES } from "@/core/types/exercises/exercise-difficulty.type";
 import { EXERCISE_TYPES } from "@/core/types/exercises/exercise-type.type";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -45,6 +46,7 @@ export function CreateExerciseForm() {
   const { mutate: createExercise } = useCreateExerciseMutation({
     onSuccess: () => {
       toast.success("Exercise has been created.");
+      setIsDialogOpen(false);
     },
     onError: (e) => {
       if (e.statusCode === 409) toast.error("Exercise already exists.");
@@ -52,12 +54,14 @@ export function CreateExerciseForm() {
     },
   });
 
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   function onSubmit(values: FormValues) {
     createExercise(values);
   }
 
   return (
-    <Dialog>
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
         <Button className="font-medium text-xs h-8">Create</Button>
       </DialogTrigger>
