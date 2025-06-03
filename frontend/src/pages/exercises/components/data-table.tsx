@@ -51,29 +51,23 @@ export function ExerciseDataTable() {
   }
 
   function TableBody() {
-    return (
-      <TanstackTableBody>
-        {[...Array(10).keys()].map(() => (
-          <TanstackTableRow className="gap-8">
-            <TanstackTableCell colSpan={exerciseColumns.length} className="h-4">
-              <Skeleton className="h-4" />
-            </TanstackTableCell>
-          </TanstackTableRow>
-        ))}
-      </TanstackTableBody>
-    );
-
     if (isLoading) {
       return (
         <TanstackTableBody>
-          <TanstackTableRow>
-            <TanstackTableCell colSpan={exerciseColumns.length} className="h-24 text-center">
-              <Skeleton className="h-4 w-[250px]" />
-            </TanstackTableCell>
-          </TanstackTableRow>
+          {[...Array(10).keys()].map((row) => (
+            <TanstackTableRow key={`row-${row}`}>
+              {[...Array(4).keys()].map((cell) => (
+                <TanstackTableCell key={`cell-${cell}`}>
+                  <Skeleton className="h-4 w-full" />
+                </TanstackTableCell>
+              ))}
+            </TanstackTableRow>
+          ))}
         </TanstackTableBody>
       );
     }
+
+    console.log({ isSuccess });
 
     if (isSuccess && !table.getRowModel().rows?.length) {
       return (
@@ -81,6 +75,18 @@ export function ExerciseDataTable() {
           <TanstackTableRow>
             <TanstackTableCell colSpan={exerciseColumns.length} className="h-24 text-center">
               No results.
+            </TanstackTableCell>
+          </TanstackTableRow>
+        </TanstackTableBody>
+      );
+    }
+
+    if (!isSuccess) {
+      return (
+        <TanstackTableBody>
+          <TanstackTableRow>
+            <TanstackTableCell colSpan={exerciseColumns.length} className="h-24 text-center">
+              Cannot connect to server.
             </TanstackTableCell>
           </TanstackTableRow>
         </TanstackTableBody>
