@@ -1,4 +1,5 @@
 import { ExerciseDifficulty, ExerciseType } from "@prisma/client";
+import { Transform } from "class-transformer";
 import { IsEnum, IsOptional, IsString } from "class-validator";
 
 export class FilterExerciseDto {
@@ -6,11 +7,21 @@ export class FilterExerciseDto {
   @IsOptional()
   name?: string;
 
-  @IsEnum(ExerciseDifficulty)
+  @IsEnum(ExerciseDifficulty, { each: true })
   @IsOptional()
-  difficulty?: ExerciseDifficulty;
+  @Transform(({ obj }) => {
+    const value = obj["difficulty[]"];
+    const values = Array.isArray(value) ? value : [value];
+    return values.filter((v) => !!v);
+  })
+  "difficulty[]"?: ExerciseDifficulty[];
 
-  @IsEnum(ExerciseType)
+  @IsEnum(ExerciseType, { each: true })
   @IsOptional()
-  type?: ExerciseType;
-} 
+  @Transform(({ obj }) => {
+    const value = obj["type[]"];
+    const values = Array.isArray(value) ? value : [value];
+    return values.filter((v) => !!v);
+  })
+  "type[]"?: ExerciseType[];
+}

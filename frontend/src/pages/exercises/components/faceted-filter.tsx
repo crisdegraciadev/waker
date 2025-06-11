@@ -3,19 +3,18 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from "@/core/components/ui/popover";
 import { cn } from "@/core/lib/utils";
 import { Check, CirclePlus } from "lucide-react";
-import { useState } from "react";
 
-type Props = {
+type Props<T extends string> = {
   title: string;
-  options: readonly string[];
-  labels: Record<string, string>;
+  options: readonly T[];
+  labels: Record<T, string>;
+  filters: T[];
+  setFilters: (val: T[]) => void;
 };
 
-export function FacetedFilter({ title, options, labels }: Props) {
-  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
-
-  function handleSelect(isSelected: boolean, option: string) {
-    setSelectedOptions(isSelected ? selectedOptions.filter((o) => o !== option) : [...selectedOptions, option]);
+export function FacetedFilter<T extends string>({ title, options, labels, setFilters, filters }: Props<T>) {
+  function handleSelect(isSelected: boolean, option: T) {
+    setFilters(isSelected ? filters.filter((o) => o !== option) : [...filters, option]);
   }
 
   return (
@@ -35,7 +34,7 @@ export function FacetedFilter({ title, options, labels }: Props) {
             <CommandEmpty />
             <CommandGroup>
               {options.map((option) => {
-                const isSelected = !!selectedOptions.find((o) => o === option);
+                const isSelected = !!filters.find((o) => o === option);
 
                 return (
                   <CommandItem key={option as string} onSelect={() => handleSelect(isSelected, option)}>

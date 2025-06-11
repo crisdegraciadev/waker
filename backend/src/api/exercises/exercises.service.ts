@@ -32,13 +32,16 @@ export class ExercisesService {
 
   async findAll(pagination: PaginationDto, filters: FilterExerciseDto, sort: SortExerciseDto, userId: number): Promise<PageEntity<ExerciseEntity>> {
     const { page, limit } = pagination;
-    const { difficulty, type, name } = filters;
+    const { "difficulty[]": difficulty, "type[]": type, name } = filters;
     const { sortBy, order } = sort;
 
-    const where: ExerciseWhere = {
+    console.log({ difficulty, type });
+
+    const difficultyFilters = difficulty?.map((d) => ({ difficulty: d })) ?? [];
+    const typeFilters = type?.map((t) => ({ type: t })) ?? [];
+
+    const baseFilters: ExerciseWhere = {
       userId,
-      ...(difficulty && { difficulty }),
-      ...(type && { type }),
       ...(name && {
         name: {
           contains: name,
@@ -47,13 +50,22 @@ export class ExercisesService {
       }),
     };
 
+    const facetedFilters: ExerciseWhere = {
+      OR: [...difficultyFilters, ...typeFilters],
+    };
+
+    const where: ExerciseWhere = {
+      ...baseFilters,
+      ...((difficultyFilters.length || difficultyFilters.length) && facetedFilters),
+    };
+
     const orderBy = sortBy ? { [sortBy]: order || SortOrder.ASC } : { name: order || SortOrder.ASC };
 
     return this.paginationService.paginate<Exercise, "Exercise", ExerciseEntity>({
       modelName: "Exercise",
       pageNumber: page,
       limit,
-      where,
+      where: where,
       orderBy,
       mapper: (exercises) => exercises.map((e) => new ExerciseEntity(e)),
     });
@@ -82,7 +94,7 @@ export class ExercisesService {
   }
 
   async remove(id: number, userId: number): Promise<void> {
-     await this.exerciseExistsGuard(id, userId);
+    await this.exerciseExistsGuard(id, userId);
 
     await this.db.exercise.delete({
       where: { id, userId },

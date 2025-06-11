@@ -4,6 +4,7 @@ import { LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import { ExerciseDataTable } from "./components/data-table";
 import { ExercisesToolbar } from "./components/toolbar";
+import type { FilterExerciseDto } from "@/core/types/exercises/filter-exercise.dto";
 
 export function ExercisesPage() {
   const [pagination, setPagination] = useState({
@@ -11,7 +12,14 @@ export function ExercisesPage() {
     pageSize: 10,
   });
 
-  const { data: exercisesPage, isLoading, isSuccess } = useFindAllExercisesQuery({ page: pagination.pageIndex, limit: pagination.pageSize });
+  const [filters, setFilters] = useState<FilterExerciseDto>({
+    difficulty: [],
+    type: [],
+  });
+
+  console.log({ filters });
+
+  const { data: exercisesPage, isLoading, isSuccess } = useFindAllExercisesQuery({ page: pagination.pageIndex, limit: pagination.pageSize }, filters);
 
   if (!exercisesPage && isLoading) {
     return (
@@ -39,7 +47,7 @@ export function ExercisesPage() {
         <h2 className="text-2xl font-bold tracking-tight">Exercise List</h2>
         <p className="text-muted-foreground">Manage your exercises from this view.</p>
       </div>
-      <ExercisesToolbar />
+      <ExercisesToolbar filters={filters} setFilters={setFilters} />
       <ExerciseDataTable data={exercisesPage?.data ?? []} pageable={exercisesPage?.pageable} pagination={pagination} setPagination={setPagination} />
     </MainLayout>
   );
