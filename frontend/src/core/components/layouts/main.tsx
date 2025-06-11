@@ -16,7 +16,7 @@ export function MainLayout({ children }: PropsWithChildren) {
             <TopbarBreadcrumb />
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-8">{children}</div>
+        <div className="flex flex-1 flex-col gap-4 p-8 max-h-[calc(100vh-64px)] overflow-y-auto">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

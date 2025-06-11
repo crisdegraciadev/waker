@@ -1,4 +1,5 @@
 import { Button } from "@/core/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/core/components/ui/select";
 import {
   Table as TanstackTable,
   TableBody as TanstackTableBody,
@@ -7,29 +8,28 @@ import {
   TableHeader as TanstackTableHeader,
   TableRow as TanstackTableRow,
 } from "@/core/components/ui/table";
-import { useFindAllExercisesQuery } from "@/core/requests/queries/use-find-all-exercises-query";
-import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { useState } from "react";
-import { exerciseColumns } from "../constants/columns";
-import { Skeleton } from "@/core/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/core/components/ui/select";
+import type { Exercise } from "@/core/types/exercises/exercise";
+import type { Pageable } from "@/core/types/utils/page";
+import { flexRender, getCoreRowModel, useReactTable, type PaginationState } from "@tanstack/react-table";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { type Dispatch, type SetStateAction } from "react";
+import { exerciseColumns } from "../constants/columns";
 
-export function ExerciseDataTable() {
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 10,
-  });
+type Props = {
+  data: Exercise[];
+  pageable: Pageable;
+  pagination: PaginationState;
+  setPagination: Dispatch<SetStateAction<PaginationState>>;
+};
 
-  const { data: exercisesPage, isLoading, isSuccess } = useFindAllExercisesQuery({ page: pagination.pageIndex, limit: pagination.pageSize });
-
+export function ExerciseDataTable({ data, pageable, pagination, setPagination }: Props) {
   const table = useReactTable({
-    data: exercisesPage?.data ?? [],
+    data: data ?? [],
     columns: exerciseColumns,
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
-    rowCount: exercisesPage?.pageable.totalEntities,
-    pageCount: exercisesPage?.pageable.totalPages,
+    rowCount: pageable.totalEntities,
+    pageCount: pageable.totalPages,
     onPaginationChange: setPagination,
     state: { pagination },
   });
@@ -53,40 +53,12 @@ export function ExerciseDataTable() {
   }
 
   function TableBody() {
-    if (isLoading) {
-      return (
-        <TanstackTableBody>
-          {[...Array(10).keys()].map((row) => (
-            <TanstackTableRow key={`row-${row}`}>
-              {[...Array(4).keys()].map((cell) => (
-                <TanstackTableCell key={`cell-${cell}`}>
-                  <Skeleton className="h-4 w-full" />
-                </TanstackTableCell>
-              ))}
-            </TanstackTableRow>
-          ))}
-        </TanstackTableBody>
-      );
-    }
-
-    if (isSuccess && !table.getRowModel().rows?.length) {
+    if (!table.getRowModel().rows?.length) {
       return (
         <TanstackTableBody>
           <TanstackTableRow>
             <TanstackTableCell colSpan={exerciseColumns.length} className="h-24 text-center">
               No results.
-            </TanstackTableCell>
-          </TanstackTableRow>
-        </TanstackTableBody>
-      );
-    }
-
-    if (!isSuccess) {
-      return (
-        <TanstackTableBody>
-          <TanstackTableRow>
-            <TanstackTableCell colSpan={exerciseColumns.length} className="h-24 text-center">
-              Cannot connect to server.
             </TanstackTableCell>
           </TanstackTableRow>
         </TanstackTableBody>
@@ -108,7 +80,7 @@ export function ExerciseDataTable() {
 
   function Pagination() {
     return (
-      <div className="flex items-center justify-between px-2 mt-4">
+      <div className="flex items-center justify-between px-2 mt-4 ">
         <div className="text-muted-foreground flex-1 text-sm">
           {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s) selected.
         </div>

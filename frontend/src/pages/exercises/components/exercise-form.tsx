@@ -12,7 +12,7 @@ import { EXERCISE_DIFFICULTIES } from "@/core/types/exercises/exercise-difficult
 import { EXERCISE_TYPES } from "@/core/types/exercises/exercise-type.type";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, type Dispatch, type SetStateAction } from "react";
+import { type Dispatch, type SetStateAction } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -72,7 +72,7 @@ export function ExerciseForm({ exercise, isDialogOpen, setIsDialogOpen }: Props)
     onError: handleError,
   });
 
-  const isUpdateMode = !!exercise
+  const isUpdateMode = !!exercise;
 
   function handleSuccess(sucessMessage: string) {
     toast.success(sucessMessage);
@@ -92,8 +92,6 @@ export function ExerciseForm({ exercise, isDialogOpen, setIsDialogOpen }: Props)
       createExercise(values);
     }
   }
-
-  console.log({ exercise });
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
