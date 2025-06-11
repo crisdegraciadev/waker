@@ -1,9 +1,12 @@
 import { Button } from "@/core/components/ui/button";
 import { Input } from "@/core/components/ui/input";
 import { CirclePlus } from "lucide-react";
-import { CreateExerciseForm } from "./create-exercise-form";
+import { ExerciseForm } from "./exercise-form";
+import { useState } from "react";
 
 export function ExercisesToolbar() {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   return (
     <div className="flex justify-between">
       <div className="flex gap-2">
@@ -23,7 +26,7 @@ export function ExercisesToolbar() {
       </div>
 
       <div>
-        <CreateExerciseForm />
+        <ExerciseForm isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} />
       </div>
     </div>
   );

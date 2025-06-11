@@ -1,9 +1,7 @@
 import { Badge } from "@/core/components/ui/badge";
-import { Button } from "@/core/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/core/components/ui/dropdown-menu";
 import type { Exercise } from "@/core/types/exercises/exercise";
 import type { ColumnDef } from "@tanstack/react-table";
-import { MoreVertical } from "lucide-react";
+import { ExerciseTableActions } from "../components/table-actions";
 
 export const exerciseColumns: ColumnDef<Exercise>[] = [
   {
@@ -30,23 +28,6 @@ export const exerciseColumns: ColumnDef<Exercise>[] = [
   },
   {
     id: "actions",
-    cell: () => (
-      <div className="text-right">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuItem disabled>Favourite</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    ),
+    cell: ({ row }) => <ExerciseTableActions exercise={row.original} />,
   },
 ];

@@ -7,6 +7,7 @@ import { useLoginMutation } from "@/core/requests/mutations/use-login-mutation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -29,6 +30,7 @@ export function LoginForm() {
 
   const { mutate: login } = useLoginMutation({
     onSuccess: ({ accessToken }) => setAccessToken(accessToken),
+    onError: () => toast.error("Invalid credentials")
   });
 
   function onSubmit(values: FormValues) {

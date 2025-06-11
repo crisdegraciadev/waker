@@ -3,11 +3,16 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, Di
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/core/components/ui/form";
 import { Input } from "@/core/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/core/components/ui/select";
+import { QueryKeys } from "@/core/constants/query-keys";
 import { useCreateExerciseMutation } from "@/core/requests/mutations/use-create-exercise-mutation";
+import { useUpdateExerciseMutation } from "@/core/requests/mutations/use-update-exercise-mutation";
+import type { ErrorEntity } from "@/core/types/error/error.entity";
+import type { Exercise } from "@/core/types/exercises/exercise";
 import { EXERCISE_DIFFICULTIES } from "@/core/types/exercises/exercise-difficulty.type";
 import { EXERCISE_TYPES } from "@/core/types/exercises/exercise-type.type";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -33,38 +38,71 @@ const EXERCISE_DIFFICULTIES_LABELS = {
   HARD: "Hard",
 };
 
-export function CreateExerciseForm() {
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
+type Props = {
+  exercise?: Exercise;
+  isDialogOpen: boolean;
+  setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
+};
+
+function setDefaultValues(exercise?: Exercise) {
+  return (
+    exercise ?? {
       name: "",
       type: "WEIGHT",
       difficulty: "MEDIUM",
-    },
+    }
+  );
+}
+
+export function ExerciseForm({ exercise, isDialogOpen, setIsDialogOpen }: Props) {
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: setDefaultValues(exercise),
   });
+
+  const queryClient = useQueryClient();
 
   const { mutate: createExercise } = useCreateExerciseMutation({
-    onSuccess: () => {
-      toast.success("Exercise has been created.");
-      setIsDialogOpen(false);
-    },
-    onError: (e) => {
-      if (e.statusCode === 409) toast.error("Exercise already exists.");
-      if (e.statusCode === 500) toast.error("Unknow error.");
-    },
+    onSuccess: () => handleSuccess("Exercise has been created."),
+    onError: handleError,
   });
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { mutate: updateExercise } = useUpdateExerciseMutation({
+    onSuccess: () => handleSuccess("Exercise has been updated."),
+    onError: handleError,
+  });
+
+  const isUpdateMode = !!exercise
+
+  function handleSuccess(sucessMessage: string) {
+    toast.success(sucessMessage);
+    setIsDialogOpen(false);
+    queryClient.invalidateQueries({ queryKey: QueryKeys.Exercises.FIND_ALL });
+  }
+
+  function handleError(e: ErrorEntity) {
+    if (e.statusCode === 409) toast.error("Exercise with the same name already exists.");
+    if (e.statusCode === 500) toast.error("Unknow error.");
+  }
 
   function onSubmit(values: FormValues) {
-    createExercise(values);
+    if (exercise) {
+      updateExercise({ id: exercise.id, ...values });
+    } else {
+      createExercise(values);
+    }
   }
+
+  console.log({ exercise });
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogTrigger asChild>
-        <Button className="font-medium text-xs h-8">Create</Button>
-      </DialogTrigger>
+      {!isUpdateMode && (
+        <DialogTrigger asChild>
+          <Button className="font-medium text-xs h-8">Create</Button>
+        </DialogTrigger>
+      )}
+
       <DialogContent className="gap-0">
         <DialogHeader className="mb-6">
           <DialogTitle>Create exercise</DialogTitle>

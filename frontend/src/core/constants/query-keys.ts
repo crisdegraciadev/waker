@@ -1,5 +1,5 @@
 export const QueryKeys = {
   Exercises: {
-    FIND_ALL: ["exercises"],
+    FIND_ALL: ["findAll", "exercises"],
   },
 };
