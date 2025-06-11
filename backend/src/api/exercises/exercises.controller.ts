@@ -1,16 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards, Query, HttpCode } from "@nestjs/common";
-import { ExercisesService } from "./exercises.service";
-import { CreateExerciseDto } from "./dtos/create-exercise.dto";
-import { UpdateExerciseDto } from "./dtos/update-exercise.dto";
-import { JwtAuthGuard } from "../auth/guards/jwt.guard";
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { GetUser } from "~/components/decorators/get-user.decorator";
 import { PaginationDto } from "~/components/dtos/pagination.dto";
-import { FilterExerciseDto } from "./dtos/filter-exercise.dto";
+import { JwtAuthGuard } from "../auth/guards/jwt.guard";
+import { CreateExerciseDto } from "./dtos/create-exercise.dto";
 import { SortExerciseDto } from "./dtos/sort-exercise.dto";
+import { UpdateExerciseDto } from "./dtos/update-exercise.dto";
+import { ExercisesService } from "./exercises.service";
+import { FilterExerciseDto } from "./dtos/filter-exercise.dto";
 
 @Controller("exercises")
 export class ExercisesController {
-  constructor(private readonly exercisesService: ExercisesService) { }
+  constructor(private readonly exercisesService: ExercisesService) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -26,6 +26,7 @@ export class ExercisesController {
     @Query() sortDto: SortExerciseDto,
     @GetUser("id") userId: number,
   ) {
+    console.log({ filterDto });
     return this.exercisesService.findAll(paginationDto, filterDto, sortDto, userId);
   }
 

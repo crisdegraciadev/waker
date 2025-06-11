@@ -6,11 +6,11 @@ export class FilterExerciseDto {
   @IsOptional()
   name?: string;
 
-  @IsEnum(ExerciseDifficulty)
+  @IsEnum(ExerciseDifficulty, { each: true })
   @IsOptional()
-  difficulty?: ExerciseDifficulty;
+  "difficulty[]"?: ExerciseDifficulty[];
 
-  @IsEnum(ExerciseType)
+  @IsEnum(ExerciseType, { each: true })
   @IsOptional()
-  type?: ExerciseType;
-} 
+  "type[]"?: ExerciseType[];
+}
