@@ -17,7 +17,12 @@ export function ExercisesToolbar({ filters, setFilters }: Props) {
   return (
     <div className="flex justify-between">
       <div className="flex gap-2">
-        <Input className="min-w-[300px] h-8" placeholder="Filter exercises..." />
+        <Input
+          value={filters.name ?? ""}
+          className="min-w-[300px] h-8"
+          placeholder="Filter exercises..."
+          onChange={(e) => setFilters((old) => ({ ...old, name: e.target.value }))}
+        />
         <FacetedFilter
           title="Type"
           options={EXERCISE_TYPES}

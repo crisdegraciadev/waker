@@ -6,6 +6,22 @@ import { ExerciseDataTable } from "./components/data-table";
 import { ExercisesToolbar } from "./components/toolbar";
 import type { FilterExerciseDto } from "@/core/types/exercises/filter-exercise.dto";
 
+function LoadingContent() {
+  return (
+    <div className="w-full h-full flex items-center justify-center">
+      <LoaderCircle className="animate-spin w-16 h-16" />
+    </div>
+  );
+}
+
+function ServerError() {
+  return (
+    <div className="w-full h-full flex items-center justify-center">
+      <p>Cannot connect to server.</p>
+    </div>
+  );
+}
+
 export function ExercisesPage() {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -13,33 +29,12 @@ export function ExercisesPage() {
   });
 
   const [filters, setFilters] = useState<FilterExerciseDto>({
+    name: null,
     difficulty: [],
     type: [],
   });
 
-  console.log({ filters });
-
   const { data: exercisesPage, isLoading, isSuccess } = useFindAllExercisesQuery({ page: pagination.pageIndex, limit: pagination.pageSize }, filters);
-
-  if (!exercisesPage && isLoading) {
-    return (
-      <MainLayout>
-        <div className="w-full h-full flex items-center justify-center">
-          <LoaderCircle className="animate-spin w-16 h-16" />
-        </div>
-      </MainLayout>
-    );
-  }
-
-  if (!isSuccess) {
-    return (
-      <MainLayout>
-        <div className="w-full h-full flex items-center justify-center">
-          <p>Cannot connect to server.</p>
-        </div>
-      </MainLayout>
-    );
-  }
 
   return (
     <MainLayout>
@@ -48,7 +43,16 @@ export function ExercisesPage() {
         <p className="text-muted-foreground">Manage your exercises from this view.</p>
       </div>
       <ExercisesToolbar filters={filters} setFilters={setFilters} />
-      <ExerciseDataTable data={exercisesPage?.data ?? []} pageable={exercisesPage?.pageable} pagination={pagination} setPagination={setPagination} />
+      {!exercisesPage && !isLoading && <LoadingContent />}
+      {!isSuccess && <ServerError />}
+      {isSuccess && (
+        <ExerciseDataTable
+          data={exercisesPage?.data ?? []}
+          pageable={exercisesPage?.pageable}
+          pagination={pagination}
+          setPagination={setPagination}
+        />
+      )}
     </MainLayout>
   );
 }
