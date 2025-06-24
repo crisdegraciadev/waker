@@ -26,7 +26,6 @@ export class ExercisesController {
     @Query() sortDto: SortExerciseDto,
     @GetUser("id") userId: number,
   ) {
-    console.log({ filterDto  });
     return this.exercisesService.findAll(paginationDto, filterDto, sortDto, userId);
   }
 

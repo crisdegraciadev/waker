@@ -1,6 +1,6 @@
 export const EXERCISE_DIFFICULTIES = ["EASY", "MEDIUM", "HARD"] as const;
 
-export const EXERICSE_DIFFICULTIES_LABELS = {
+export const EXERCISE_DIFFICULTIES_LABELS = {
   EASY: "Easy",
   MEDIUM: "Medium",
   HARD: "Hard",

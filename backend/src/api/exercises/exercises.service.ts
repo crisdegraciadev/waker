@@ -35,11 +35,6 @@ export class ExercisesService {
     const { "difficulty[]": difficulty, "type[]": type, name } = filters;
     const { sortBy, order } = sort;
 
-    console.log({ difficulty, type });
-
-    const difficultyFilters = difficulty?.map((d) => ({ difficulty: d })) ?? [];
-    const typeFilters = type?.map((t) => ({ type: t })) ?? [];
-
     const baseFilters: ExerciseWhere = {
       userId,
       ...(name && {
@@ -50,13 +45,16 @@ export class ExercisesService {
       }),
     };
 
+    const difficultyFilters = difficulty?.map((d) => ({ difficulty: d })) ?? [];
+    const typeFilters = type?.map((t) => ({ type: t })) ?? [];
+
     const facetedFilters: ExerciseWhere = {
       OR: [...difficultyFilters, ...typeFilters],
     };
 
     const where: ExerciseWhere = {
       ...baseFilters,
-      ...((difficultyFilters.length || difficultyFilters.length) && facetedFilters),
+      ...((difficultyFilters.length || typeFilters.length) && facetedFilters),
     };
 
     const orderBy = sortBy ? { [sortBy]: order || SortOrder.ASC } : { name: order || SortOrder.ASC };

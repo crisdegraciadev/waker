@@ -1,35 +1,26 @@
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/core/components/ui/alert-dialog";
-import { Button } from "@/core/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/core/components/ui/dropdown-menu";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/core/components/ui/alert-dialog";
 import { QueryKeys } from "@/core/constants/query-keys";
-import { useDeleteExerciseMutation } from "@/core/requests/exercises/mutations/use-delete-exercise";
+import { useDeleteWorkoutMutation } from "@/core/requests/workouts/mutations/use-delete-workout";
+import type { Workout } from "@/core/types/workouts/workouts";
 import { useQueryClient } from "@tanstack/react-query";
-import { MoreVertical } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ExerciseForm } from "./form";
-import type { Exercise } from "@/core/types/exercises/exercise";
+import { WorkoutForm } from "./form";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/core/components/ui/dropdown-menu";
+import { Button } from "@/core/components/ui/button";
+import { MoreVertical } from "lucide-react";
 
 type Props = {
-  exercise: Exercise;
+  workout: Workout;
 };
 
-export function ExerciseTableActions({ exercise }: Props) {
+export function WorkoutTableActions({ workout }: Props) {
   const queryClient = useQueryClient();
 
-  const { mutate: deleteExercise } = useDeleteExerciseMutation({
+  const { mutate: deleteWorkout } = useDeleteWorkoutMutation({
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QueryKeys.Exercises.FIND_ALL });
-      toast.success("Exercise deleted");
+      queryClient.invalidateQueries({ queryKey: QueryKeys.Workouts.FIND_ALL });
+      toast.success("Workout deleted");
     },
   });
 
@@ -43,12 +34,12 @@ export function ExerciseTableActions({ exercise }: Props) {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your exercise and remove your data from our servers.
+              This action cannot be undone. This will permanently delete your workout and remove your data from our servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => deleteExercise(exercise.id)}>Delete</AlertDialogAction>
+            <AlertDialogAction onClick={() => deleteWorkout(workout.id)}>Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -58,7 +49,7 @@ export function ExerciseTableActions({ exercise }: Props) {
   return (
     <>
       <ConfirmDeleteDialog />
-      <ExerciseForm exercise={exercise} isDialogOpen={isUpdateDialogOpen} setIsDialogOpen={setIsUpdateDialogOpen} />
+      <WorkoutForm workout={workout} isDialogOpen={isUpdateDialogOpen} setIsDialogOpen={setIsUpdateDialogOpen} />
 
       <div className="text-right">
         <DropdownMenu>

@@ -19,7 +19,7 @@ export class WorkoutsService {
     private db: DatabaseService,
     private paginationService: PaginationService,
     private entityVerifier: EntityVerifierService,
-  ) {}
+  ) { }
 
   async create(createWorkoutDto: CreateWorkoutDto, userId: number): Promise<WorkoutEntity> {
     const { name } = createWorkoutDto;
@@ -34,18 +34,28 @@ export class WorkoutsService {
 
   async findAll(pagination: PaginationDto, filters: FilterWorkoutDto, sort: SortWorkoutDto, userId: number): Promise<PageEntity<WorkoutEntity>> {
     const { page, limit } = pagination;
-    const { type, name } = filters;
+    const { "type[]": type, name } = filters;
     const { sortBy, order } = sort;
 
-    const where: WorkoutWhere = {
+    const typeFilters = type?.map((t) => ({ type: t })) ?? [];
+
+    const baseFilters: WorkoutWhere = {
       userId,
-      ...(type && { type }),
       ...(name && {
         name: {
           contains: name,
           mode: Prisma.QueryMode.insensitive,
         },
       }),
+    };
+
+    const facetedFilters: WorkoutWhere = {
+      OR: [...typeFilters],
+    };
+
+    const where: WorkoutWhere = {
+      ...baseFilters,
+      ...(typeFilters.length && facetedFilters),
     };
 
     const orderBy = sortBy ? { [sortBy]: order || SortOrder.ASC } : { name: order || SortOrder.ASC };

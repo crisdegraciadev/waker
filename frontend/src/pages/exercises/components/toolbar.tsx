@@ -1,10 +1,10 @@
+import { FacetedFilter } from "@/core/components/custom/faceted-filter";
 import { Input } from "@/core/components/ui/input";
-import { EXERCISE_DIFFICULTIES, EXERICSE_DIFFICULTIES_LABELS } from "@/core/types/exercises/exercise-difficulty.type";
+import { EXERCISE_DIFFICULTIES, EXERCISE_DIFFICULTIES_LABELS } from "@/core/types/exercises/exercise-difficulty.type";
 import { EXERCISE_TYPES, EXERICSE_TYPES_LABELS } from "@/core/types/exercises/exercise-type.type";
 import type { FilterExerciseDto } from "@/core/types/exercises/filter-exercise.dto";
 import { useState, type Dispatch, type SetStateAction } from "react";
-import { ExerciseForm } from "./exercise-form";
-import { FacetedFilter } from "./faceted-filter";
+import { ExerciseForm } from "./form";
 
 type Props = {
   filters: FilterExerciseDto;
@@ -15,11 +15,11 @@ export function ExercisesToolbar({ filters, setFilters }: Props) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
-    <div className="flex justify-between">
-      <div className="flex gap-2">
+    <div className="flex gap-2 justify-between">
+      <div className="flex flex-wrap gap-2 w-full">
         <Input
           value={filters.name ?? ""}
-          className="min-w-[300px] h-8"
+          className="w-[300px] h-8"
           placeholder="Filter exercises..."
           onChange={(e) => setFilters((old) => ({ ...old, name: e.target.value }))}
         />
@@ -33,7 +33,7 @@ export function ExercisesToolbar({ filters, setFilters }: Props) {
         <FacetedFilter
           title="Difficulty"
           options={EXERCISE_DIFFICULTIES}
-          labels={EXERICSE_DIFFICULTIES_LABELS}
+          labels={EXERCISE_DIFFICULTIES_LABELS}
           filters={filters.difficulty}
           setFilters={(difficulty) => setFilters((old) => ({ ...old, difficulty }))}
         />

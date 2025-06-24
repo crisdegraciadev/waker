@@ -4,12 +4,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/core/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/core/components/ui/select";
 import { QueryKeys } from "@/core/constants/query-keys";
-import { useCreateExerciseMutation } from "@/core/requests/mutations/use-create-exercise-mutation";
-import { useUpdateExerciseMutation } from "@/core/requests/mutations/use-update-exercise-mutation";
+import { useCreateExerciseMutation } from "@/core/requests/exercises/mutations/use-create-exercise-mutation";
+import { useUpdateExerciseMutation } from "@/core/requests/exercises/mutations/use-update-exercise-mutation";
 import type { ErrorEntity } from "@/core/types/error/error.entity";
 import type { Exercise } from "@/core/types/exercises/exercise";
-import { EXERCISE_DIFFICULTIES } from "@/core/types/exercises/exercise-difficulty.type";
-import { EXERCISE_TYPES } from "@/core/types/exercises/exercise-type.type";
+import { EXERCISE_DIFFICULTIES, EXERCISE_DIFFICULTIES_LABELS } from "@/core/types/exercises/exercise-difficulty.type";
+import { EXERCISE_TYPES, EXERICSE_TYPES_LABELS } from "@/core/types/exercises/exercise-type.type";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { type Dispatch, type SetStateAction } from "react";
@@ -24,19 +24,6 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
-
-const EXERCISE_TYPE_LABELS = {
-  BODY_WEIGHT: "Body Weight",
-  WEIGHT: "Weight",
-  STRETCH: "Stretch",
-  MOBILITY: "Mobility",
-};
-
-const EXERCISE_DIFFICULTIES_LABELS = {
-  EASY: "Easy",
-  MEDIUM: "Medium",
-  HARD: "Hard",
-};
 
 type Props = {
   exercise?: Exercise;
@@ -138,7 +125,7 @@ export function ExerciseForm({ exercise, isDialogOpen, setIsDialogOpen }: Props)
                     <SelectContent>
                       {EXERCISE_TYPES.map((t) => (
                         <SelectItem key={t} value={t}>
-                          {EXERCISE_TYPE_LABELS[t]}
+                          {EXERICSE_TYPES_LABELS[t]}
                         </SelectItem>
                       ))}
                     </SelectContent>

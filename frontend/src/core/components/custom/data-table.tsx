@@ -8,24 +8,23 @@ import {
   TableHeader as TanstackTableHeader,
   TableRow as TanstackTableRow,
 } from "@/core/components/ui/table";
-import type { Exercise } from "@/core/types/exercises/exercise";
 import type { Pageable } from "@/core/types/utils/page";
-import { flexRender, getCoreRowModel, useReactTable, type PaginationState } from "@tanstack/react-table";
+import { flexRender, getCoreRowModel, useReactTable, type ColumnDef, type PaginationState } from "@tanstack/react-table";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { type Dispatch, type SetStateAction } from "react";
-import { exerciseColumns } from "../constants/columns";
 
-type Props = {
-  data: Exercise[];
+type Props<T, R> = {
+  data: T[];
+  columns: ColumnDef<T, R>[];
   pageable: Pageable;
   pagination: PaginationState;
   setPagination: Dispatch<SetStateAction<PaginationState>>;
 };
 
-export function ExerciseDataTable({ data, pageable, pagination, setPagination }: Props) {
+export function DataTable<T, R>({ data, columns, pageable, pagination, setPagination }: Props<T, R>) {
   const table = useReactTable({
     data: data ?? [],
-    columns: exerciseColumns,
+    columns,
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
     rowCount: pageable.totalEntities,
@@ -41,7 +40,7 @@ export function ExerciseDataTable({ data, pageable, pagination, setPagination }:
           <TanstackTableRow key={headerGroup.id}>
             {headerGroup.headers.map((header) => {
               return (
-                <TanstackTableHead key={header.id}>
+                <TanstackTableHead key={header.id} style={{ width: header.column.columnDef.size }}>
                   {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                 </TanstackTableHead>
               );
@@ -57,7 +56,7 @@ export function ExerciseDataTable({ data, pageable, pagination, setPagination }:
       return (
         <TanstackTableBody>
           <TanstackTableRow>
-            <TanstackTableCell colSpan={exerciseColumns.length} className="h-24 text-center">
+            <TanstackTableCell colSpan={columns.length} className="h-24 text-center">
               No results.
             </TanstackTableCell>
           </TanstackTableRow>
@@ -80,31 +79,28 @@ export function ExerciseDataTable({ data, pageable, pagination, setPagination }:
 
   function Pagination() {
     return (
-      <div className="flex items-center justify-between px-2 mt-4 ">
-        <div className="text-muted-foreground flex-1 text-sm">
-          {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s) selected.
+      <div className="flex items-center justify-end px-2 mt-4 ">
+        <div className="flex items-center space-x-2">
+          <p className="text-sm font-medium">Rows per page</p>
+          <Select
+            value={`${table.getState().pagination.pageSize}`}
+            onValueChange={(value) => {
+              table.setPageSize(Number(value));
+            }}
+          >
+            <SelectTrigger className="h-8 w-[70px]">
+              <SelectValue placeholder={table.getState().pagination.pageSize} />
+            </SelectTrigger>
+            <SelectContent side="top">
+              {[10, 20, 25, 30, 40, 50].map((pageSize) => (
+                <SelectItem key={pageSize} value={`${pageSize}`}>
+                  {pageSize}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <div className="flex items-center space-x-6 lg:space-x-8">
-          <div className="flex items-center space-x-2">
-            <p className="text-sm font-medium">Rows per page</p>
-            <Select
-              value={`${table.getState().pagination.pageSize}`}
-              onValueChange={(value) => {
-                table.setPageSize(Number(value));
-              }}
-            >
-              <SelectTrigger className="h-8 w-[70px]">
-                <SelectValue placeholder={table.getState().pagination.pageSize} />
-              </SelectTrigger>
-              <SelectContent side="top">
-                {[10, 20, 25, 30, 40, 50].map((pageSize) => (
-                  <SelectItem key={pageSize} value={`${pageSize}`}>
-                    {pageSize}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="flex space-x-2">
           <div className="flex w-[100px] items-center justify-center text-sm font-medium">
             Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
           </div>

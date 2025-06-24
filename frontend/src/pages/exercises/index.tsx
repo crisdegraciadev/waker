@@ -1,26 +1,12 @@
+import { DataTable } from "@/core/components/custom/data-table";
+import { LoadingContent } from "@/core/components/custom/loading-content";
+import { ServerError } from "@/core/components/custom/server-error";
 import { MainLayout } from "@/core/components/layouts/main";
-import { useFindAllExercisesQuery } from "@/core/requests/queries/use-find-all-exercises-query";
-import { LoaderCircle } from "lucide-react";
-import { useState } from "react";
-import { ExerciseDataTable } from "./components/data-table";
-import { ExercisesToolbar } from "./components/toolbar";
+import { useFindAllExercisesQuery } from "@/core/requests/exercises/queries/use-find-all-exercises-query";
 import type { FilterExerciseDto } from "@/core/types/exercises/filter-exercise.dto";
-
-function LoadingContent() {
-  return (
-    <div className="w-full h-full flex items-center justify-center">
-      <LoaderCircle className="animate-spin w-16 h-16" />
-    </div>
-  );
-}
-
-function ServerError() {
-  return (
-    <div className="w-full h-full flex items-center justify-center">
-      <p>Cannot connect to server.</p>
-    </div>
-  );
-}
+import { useState } from "react";
+import { ExercisesToolbar } from "./components/toolbar";
+import { exerciseTableColumns } from "./constants/table-columns";
 
 export function ExercisesPage() {
   const [pagination, setPagination] = useState({
@@ -43,11 +29,12 @@ export function ExercisesPage() {
         <p className="text-muted-foreground">Manage your exercises from this view.</p>
       </div>
       <ExercisesToolbar filters={filters} setFilters={setFilters} />
-      {!exercisesPage && !isLoading && <LoadingContent />}
+      {!exercisesPage && isLoading && <LoadingContent />}
       {!isSuccess && <ServerError />}
       {isSuccess && (
-        <ExerciseDataTable
+        <DataTable
           data={exercisesPage?.data ?? []}
+          columns={exerciseTableColumns}
           pageable={exercisesPage?.pageable}
           pagination={pagination}
           setPagination={setPagination}

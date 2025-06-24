@@ -1,7 +1,7 @@
 import { ApiRoutes } from "@/core/constants/api-routes";
 import type { ErrorEntity } from "@/core/types/error/error.entity";
 import { useMutation, type MutationOptions } from "@tanstack/react-query";
-import { request } from "../request";
+import { request } from "../../request";
 
 function mutationFn(id: number) {
   return request({

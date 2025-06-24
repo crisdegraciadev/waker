@@ -3,7 +3,7 @@ import type { ErrorEntity } from "@/core/types/error/error.entity";
 import type { Exercise } from "@/core/types/exercises/exercise";
 import type { UpdateExerciseDto } from "@/core/types/exercises/update-exercise.dto";
 import { useMutation, type MutationOptions } from "@tanstack/react-query";
-import { request } from "../request";
+import { request } from "../../request";
 
 function mutationFn(dto: UpdateExerciseDto) {
   return request({

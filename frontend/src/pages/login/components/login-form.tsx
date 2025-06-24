@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/cor
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/core/components/ui/form";
 import { Input } from "@/core/components/ui/input";
 import { LocalStorageKeys } from "@/core/constants/local-storage-keys";
-import { useLoginMutation } from "@/core/requests/mutations/use-login-mutation";
+import { useLoginMutation } from "@/core/requests/auth/queries/use-login-mutation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import { useForm } from "react-hook-form";

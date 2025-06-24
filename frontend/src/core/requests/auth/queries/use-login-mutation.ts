@@ -6,7 +6,7 @@ import {
   useMutation,
   type MutationOptions
 } from "@tanstack/react-query";
-import { request } from "../request";
+import { request } from "../../request";
 
 function mutationFn(credentials: LoginDto) {
   return request({
