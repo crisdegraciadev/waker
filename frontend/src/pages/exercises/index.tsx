@@ -2,13 +2,17 @@ import { DataTable } from "@/core/components/custom/data-table";
 import { LoadingContent } from "@/core/components/custom/loading-content";
 import { ServerError } from "@/core/components/custom/server-error";
 import { MainLayout } from "@/core/components/layouts/main";
+import { AppRoutes } from "@/core/constants/app-routes";
 import { useFindAllExercisesQuery } from "@/core/requests/exercises/queries/use-find-all-exercises-query";
+import { useTopbarBreadcrumbStore } from "@/core/state/topbar-breadcrumb-store";
 import type { FilterExerciseDto } from "@/core/types/exercises/filter-exercise.dto";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ExercisesToolbar } from "./components/toolbar";
 import { exerciseTableColumns } from "./constants/table-columns";
 
 export function ExercisesPage() {
+  const setSteps = useTopbarBreadcrumbStore((state) => state.setSteps);
+
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -18,6 +22,10 @@ export function ExercisesPage() {
     name: null,
     difficulty: [],
     type: [],
+  });
+
+  useEffect(() => {
+    setSteps([{ label: "Exercises", route: AppRoutes.EXERCISES }]);
   });
 
   const { data: exercisesPage, isLoading, isSuccess } = useFindAllExercisesQuery({ page: pagination.pageIndex, limit: pagination.pageSize }, filters);

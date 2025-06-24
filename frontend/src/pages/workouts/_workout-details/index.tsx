@@ -1,18 +1,16 @@
-import { MainLayout } from "@/core/components/layouts/main";
 import { AppRoutes } from "@/core/constants/app-routes";
 import { useTopbarBreadcrumbStore } from "@/core/state/topbar-breadcrumb-store";
 import { useEffect } from "react";
 
-export function DashboardPage() {
+export function WorkoutDetailsPage() {
   const setSteps = useTopbarBreadcrumbStore((state) => state.setSteps);
 
   useEffect(() => {
-    setSteps([{ label: "Dashboard", route: AppRoutes.DASHBOARD }]);
+    setSteps([
+      { label: "Workouts", route: AppRoutes.WORKOUTS },
+      { label: "Upper", route: "/1" },
+    ]);
   });
 
-  return (
-    <MainLayout>
-      <p>Dashboard</p>
-    </MainLayout>
-  );
+  return <p>Workout details</p>;
 }

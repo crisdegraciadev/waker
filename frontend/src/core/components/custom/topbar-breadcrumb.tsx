@@ -1,45 +1,17 @@
-import { Link, useLocation } from "react-router";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "../ui/breadcrumb";
-import { AppRoutes } from "@/core/constants/app-routes";
+import { useTopbarBreadcrumbStore } from "@/core/state/topbar-breadcrumb-store";
 import React from "react";
-
-const BREACRUMB_STEPS: Record<string, { label: string; route: string }> = {
-  account: {
-    label: "Account",
-    route: AppRoutes.ACCOUNT,
-  },
-  settings: {
-    label: "Settings",
-    route: AppRoutes.SETTINGS,
-  },
-  dashboard: {
-    label: "Dashboard",
-    route: AppRoutes.DASHBOARD,
-  },
-  workouts: {
-    label: "Workouts",
-    route: AppRoutes.WORKOUTS,
-  },
-  exercises: {
-    label: "Exercises",
-    route: AppRoutes.EXERCISES,
-  },
-};
+import { Link } from "react-router";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "../ui/breadcrumb";
 
 export function TopbarBreadcrumb() {
-  const location = useLocation();
-
-  const steps = location.pathname
-    .split("/")
-    .filter((s) => s)
-    .map((s) => BREACRUMB_STEPS[s]);
+  const steps = useTopbarBreadcrumbStore((state) => state.steps);
 
   return (
     <Breadcrumb>
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
-            <Link to={steps[0].route}>{steps[0].label}</Link>
+            <Link to={steps[0]?.route}>{steps[0]?.label}</Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
 

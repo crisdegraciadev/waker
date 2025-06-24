@@ -3,12 +3,16 @@ import { ServerError } from "@/core/components/custom/server-error";
 import { MainLayout } from "@/core/components/layouts/main";
 import { useFindAllWorkoutsQuery } from "@/core/requests/workouts/queries/use-find-all-workouts";
 import type { FilterWorkoutDto } from "@/core/types/workouts/filter-workout";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { WorkoutsToolbar } from "./components/toolbar";
 import { DataTable } from "@/core/components/custom/data-table";
 import { workoutTableColumns } from "./constants/table-columns";
+import { useTopbarBreadcrumbStore } from "@/core/state/topbar-breadcrumb-store";
+import { AppRoutes } from "@/core/constants/app-routes";
 
 export function WorkoutsPage() {
+  const setSteps = useTopbarBreadcrumbStore((state) => state.setSteps);
+
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -17,6 +21,10 @@ export function WorkoutsPage() {
   const [filters, setFilters] = useState<FilterWorkoutDto>({
     name: null,
     type: [],
+  });
+
+  useEffect(() => {
+    setSteps([{ label: "Workouts", route: AppRoutes.WORKOUTS }]);
   });
 
   const { data: workoutsPage, isLoading, isSuccess } = useFindAllWorkoutsQuery({ page: pagination.pageIndex, limit: pagination.pageSize }, filters);
