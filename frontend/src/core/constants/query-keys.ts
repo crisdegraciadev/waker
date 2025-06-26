@@ -4,5 +4,6 @@ export const QueryKeys = {
   },
   Workouts: {
     FIND_ALL: ["findAll", "workouts"],
+    FIND: ["find", "workout"],
   },
 };
