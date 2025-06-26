@@ -1,21 +1,21 @@
 import { Badge } from "@/core/components/ui/badge";
-import { WORKOUT_TYPES_LABELS, type WorkoutType } from "@/core/types/workouts/workout-type";
+import { AppRoutes } from "@/core/constants/app-routes";
+import { WORKOUT_TYPES_LABELS } from "@/core/types/workouts/workout-type";
 import type { Workout } from "@/core/types/workouts/workouts";
 import type { ColumnDef } from "@tanstack/react-table";
+import { Link } from "react-router";
 import { WorkoutTableActions } from "../components/table-actions";
 
 export const workoutTableColumns: ColumnDef<Workout>[] = [
   {
     accessorKey: "name",
     header: "Name",
+    cell: ({ row }) => <Link to={`${AppRoutes.WORKOUTS}/${row.original.id}`}>{row.original.name}</Link>,
   },
   {
     accessorKey: "type",
     header: "Type",
-    cell: ({ row }) => {
-      const type = String(row.getValue("type")) as WorkoutType;
-      return <Badge variant="outline">{WORKOUT_TYPES_LABELS[type]}</Badge>;
-    },
+    cell: ({ row }) => <Badge variant="outline">{WORKOUT_TYPES_LABELS[row.original.type]}</Badge>,
   },
   {
     id: "actions",

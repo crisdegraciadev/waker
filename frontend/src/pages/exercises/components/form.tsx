@@ -9,7 +9,7 @@ import { useUpdateExerciseMutation } from "@/core/requests/exercises/mutations/u
 import type { ErrorEntity } from "@/core/types/error/error.entity";
 import type { Exercise } from "@/core/types/exercises/exercise";
 import { EXERCISE_DIFFICULTIES, EXERCISE_DIFFICULTIES_LABELS } from "@/core/types/exercises/exercise-difficulty.type";
-import { EXERCISE_TYPES, EXERICSE_TYPES_LABELS } from "@/core/types/exercises/exercise-type.type";
+import { EXERCISE_TYPES, EXERCISE_TYPES_LABELS } from "@/core/types/exercises/exercise-type.type";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { type Dispatch, type SetStateAction } from "react";
@@ -125,7 +125,7 @@ export function ExerciseForm({ exercise, isDialogOpen, setIsDialogOpen }: Props)
                     <SelectContent>
                       {EXERCISE_TYPES.map((t) => (
                         <SelectItem key={t} value={t}>
-                          {EXERICSE_TYPES_LABELS[t]}
+                          {EXERCISE_TYPES_LABELS[t]}
                         </SelectItem>
                       ))}
                     </SelectContent>

@@ -1,7 +1,7 @@
 import { FacetedFilter } from "@/core/components/custom/faceted-filter";
 import { Input } from "@/core/components/ui/input";
 import { EXERCISE_DIFFICULTIES, EXERCISE_DIFFICULTIES_LABELS } from "@/core/types/exercises/exercise-difficulty.type";
-import { EXERCISE_TYPES, EXERICSE_TYPES_LABELS } from "@/core/types/exercises/exercise-type.type";
+import { EXERCISE_TYPES, EXERCISE_TYPES_LABELS } from "@/core/types/exercises/exercise-type.type";
 import type { FilterExerciseDto } from "@/core/types/exercises/filter-exercise.dto";
 import { useState, type Dispatch, type SetStateAction } from "react";
 import { ExerciseForm } from "./form";
@@ -26,7 +26,7 @@ export function ExercisesToolbar({ filters, setFilters }: Props) {
         <FacetedFilter
           title="Type"
           options={EXERCISE_TYPES}
-          labels={EXERICSE_TYPES_LABELS}
+          labels={EXERCISE_TYPES_LABELS}
           filters={filters.type}
           setFilters={(type) => setFilters((old) => ({ ...old, type }))}
         />
