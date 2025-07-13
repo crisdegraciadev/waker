@@ -3,15 +3,14 @@ import { ServerError } from "@/core/components/custom/server-error";
 import { MainLayout } from "@/core/components/layouts/main";
 import { Button } from "@/core/components/ui/button";
 import { Calendar } from "@/core/components/ui/calendar";
-import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/core/components/ui/card";
 import { AppRoutes } from "@/core/constants/app-routes";
 import { useFindWorkoutQuery } from "@/core/requests/workouts/queries/use-find-workout";
 import { useTopbarBreadcrumbStore } from "@/core/state/topbar-breadcrumb-store";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { ProgressionTable } from "./components/progression-table";
-import { WorkoutDetailsToolbar } from "./components/toolbar";
-import type { DateRange } from "react-day-picker";
+import { ProgressionForm } from "./components/form";
+import { ProgressionActions } from "./components/actions";
 
 export function WorkoutDetailsPage() {
   const setSteps = useTopbarBreadcrumbStore((state) => state.setSteps);
@@ -41,11 +40,7 @@ export function WorkoutDetailsPage() {
               <h2 className="text-2xl font-bold tracking-tight">{workout.name}</h2>
               <p className="text-muted-foreground">Manage your workout progression from this view.</p>
             </div>
-
-            <div className="flex gap-2">
-              <Button variant="outline">Update</Button>
-              <Button>Create</Button>
-            </div>
+            <ProgressionActions />
           </div>
 
           <div className="flex gap-6">

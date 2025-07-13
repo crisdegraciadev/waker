@@ -49,7 +49,7 @@ export class PaginationService {
     const totalPages = Math.ceil(totalEntities / pageSize);
 
     const nextPage = pageNumber === totalPages ? pageNumber : pageNumber + 1;
-    const prevPage = pageNumber === 1 ? 1 : pageNumber - 1;
+    const prevPage = pageNumber === 0 ? 0 : pageNumber - 1;
 
     return {
       pageNumber,

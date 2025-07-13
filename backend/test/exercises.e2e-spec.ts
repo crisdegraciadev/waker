@@ -163,30 +163,30 @@ describe("ExercisesController (e2e)", () => {
     it("should return 200 OK and get all exercises with pagination", async () => {
       const { get } = authRequest(api, authToken);
 
-      const { body: firstPageBody, statusCode: firstPageStatusCode } = await get("/exercises?page=1&limit=2");
+      const { body: firstPageBody, statusCode: firstPageStatusCode } = await get("/exercises?page=0&limit=2");
 
       expect(firstPageStatusCode).toBe(200);
       expect(firstPageBody.data).toHaveLength(2);
       expect(firstPageBody.pageable).toEqual({
+        pageNumber: 0,
+        pageSize: 2,
+        totalEntities: 4,
+        totalPages: 2,
+        nextPage: 1,
+        prevPage: 0,
+      });
+
+      const { body: secondPageBody, statusCode: secondPageStatusCode } = await get("/exercises?page=1&limit=2");
+
+      expect(secondPageStatusCode).toBe(200);
+      expect(secondPageBody.data).toHaveLength(2);
+      expect(secondPageBody.pageable).toEqual({
         pageNumber: 1,
         pageSize: 2,
         totalEntities: 4,
         totalPages: 2,
         nextPage: 2,
-        prevPage: 1,
-      });
-
-      const { body: secondPageBody, statusCode: secondPageStatusCode } = await get("/exercises?page=2&limit=2");
-
-      expect(secondPageStatusCode).toBe(200);
-      expect(secondPageBody.data).toHaveLength(2);
-      expect(secondPageBody.pageable).toEqual({
-        pageNumber: 2,
-        pageSize: 2,
-        totalEntities: 4,
-        totalPages: 2,
-        nextPage: 2,
-        prevPage: 1,
+        prevPage: 0,
       });
     });
 
@@ -198,12 +198,12 @@ describe("ExercisesController (e2e)", () => {
       expect(statusCode).toBe(200);
       expect(body.data).toHaveLength(4);
       expect(body.pageable).toEqual({
-        pageNumber: 1,
+        pageNumber: 0,
         pageSize: 10,
         totalEntities: 4,
         totalPages: 1,
         nextPage: 1,
-        prevPage: 1,
+        prevPage: 0,
       });
     });
 
@@ -218,7 +218,7 @@ describe("ExercisesController (e2e)", () => {
 
     it("should return 200 OK if filter exercises by difficulty", async () => {
       const { get } = authRequest(api, authToken);
-      const { body, statusCode } = await get("/exercises?difficulty=HARD");
+      const { body, statusCode } = await get("/exercises?difficulty[]=HARD");
 
       expect(statusCode).toBe(200);
       expect(body.data).toHaveLength(2);
@@ -227,7 +227,7 @@ describe("ExercisesController (e2e)", () => {
 
     it("should return 200 OK if filter exercises by type", async () => {
       const { get } = authRequest(api, authToken);
-      const { body, statusCode } = await get("/exercises?type=WEIGHT");
+      const { body, statusCode } = await get("/exercises?type[]=WEIGHT");
 
       expect(statusCode).toBe(200);
       expect(body.data).toHaveLength(2);
@@ -236,7 +236,7 @@ describe("ExercisesController (e2e)", () => {
 
     it("should return 200 OK if filter exercises by multiple criteria", async () => {
       const { get } = authRequest(api, authToken);
-      const { body, statusCode } = await get("/exercises?difficulty=HARD&type=BODY_WEIGHT");
+      const { body, statusCode } = await get("/exercises?difficulty[]=HARD&type[]=BODY_WEIGHT");
 
       expect(statusCode).toBe(200);
       expect(body.data).toHaveLength(1);
@@ -343,7 +343,7 @@ describe("ExercisesController (e2e)", () => {
 
     it("should return 200 OK if sort exercises with filters", async () => {
       const { get } = authRequest(api, authToken);
-      const { body, statusCode } = await get("/exercises?sortBy=difficulty&order=desc&type=WEIGHT");
+      const { body, statusCode } = await get("/exercises?sortBy=difficulty&order=desc&type[]=WEIGHT");
 
       expect(statusCode).toBe(200);
       expect(body.data).toHaveLength(2);
@@ -354,7 +354,7 @@ describe("ExercisesController (e2e)", () => {
       const { get } = authRequest(api, authToken);
 
       const testCases = [
-        { query: "page=0&limit=10", message: "page must not be less than 1" },
+        { query: "page=-1&limit=10", message: "page must not be less than 0" },
         { query: "page=1&limit=0", message: "limit must not be less than 1" },
         { query: "page=abc&limit=10", message: "page must be an integer number" },
         { query: "page=1&limit=abc", message: "limit must be an integer number" },

@@ -153,30 +153,30 @@ describe("WorkoutsController (e2e)", () => {
     it("should return 200 OK and get all workouts with pagination", async () => {
       const { get } = authRequest(api, authToken);
 
-      const { body: firstPageBody, statusCode: firstPageStatusCode } = await get("/workouts?page=1&limit=2");
+      const { body: firstPageBody, statusCode: firstPageStatusCode } = await get("/workouts?page=0&limit=2");
 
       expect(firstPageStatusCode).toBe(200);
       expect(firstPageBody.data).toHaveLength(2);
       expect(firstPageBody.pageable).toEqual({
+        pageNumber: 0,
+        pageSize: 2,
+        totalEntities: 4,
+        totalPages: 2,
+        nextPage: 1,
+        prevPage: 0,
+      });
+
+      const { body: secondPageBody, statusCode: secondPageStatusCode } = await get("/workouts?page=1&limit=2");
+
+      expect(secondPageStatusCode).toBe(200);
+      expect(secondPageBody.data).toHaveLength(2);
+      expect(secondPageBody.pageable).toEqual({
         pageNumber: 1,
         pageSize: 2,
         totalEntities: 4,
         totalPages: 2,
         nextPage: 2,
-        prevPage: 1,
-      });
-
-      const { body: secondPageBody, statusCode: secondPageStatusCode } = await get("/workouts?page=2&limit=2");
-
-      expect(secondPageStatusCode).toBe(200);
-      expect(secondPageBody.data).toHaveLength(2);
-      expect(secondPageBody.pageable).toEqual({
-        pageNumber: 2,
-        pageSize: 2,
-        totalEntities: 4,
-        totalPages: 2,
-        nextPage: 2,
-        prevPage: 1,
+        prevPage: 0,
       });
     });
 
@@ -188,12 +188,12 @@ describe("WorkoutsController (e2e)", () => {
       expect(statusCode).toBe(200);
       expect(body.data).toHaveLength(4);
       expect(body.pageable).toEqual({
-        pageNumber: 1,
+        pageNumber: 0,
         pageSize: 10,
         totalEntities: 4,
         totalPages: 1,
         nextPage: 1,
-        prevPage: 1,
+        prevPage: 0,
       });
     });
 
@@ -208,7 +208,7 @@ describe("WorkoutsController (e2e)", () => {
 
     it("should return 200 OK if filter workouts by type", async () => {
       const { get } = authRequest(api, authToken);
-      const { body, statusCode } = await get("/workouts?type=WEIGHTS");
+      const { body, statusCode } = await get("/workouts?type[]=WEIGHTS");
 
       expect(statusCode).toBe(200);
       expect(body.data).toHaveLength(1);

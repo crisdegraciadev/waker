@@ -9,6 +9,7 @@ import { UsersModule } from "../src/api/users/users.module";
 import { createTestApp } from "./config/test-app.factory";
 import { CREATE_ACTIVITY_DTO_1 } from "./fixtures/activities";
 import { CREATE_EXERCISE_DTO_1, CREATE_EXERCISE_DTO_2 } from "./fixtures/exercises";
+import { CREATE_PROGRESSION_DTO_1 } from "./fixtures/progressions";
 import { CREATE_USER_DTO_1, CREATE_USER_DTO_2 } from "./fixtures/users";
 import { CREATE_WORKOUT_DTO_1 } from "./fixtures/workouts";
 import authRequest from "./helpers/auth-request";
@@ -32,14 +33,18 @@ describe("ActivitiesController (e2e)", () => {
 
     const { post } = authRequest(api, authToken);
 
+    const { body: exerciseBody } = await post(`/exercises`).send(CREATE_EXERCISE_DTO_1);
+    EXERCISE_ID = exerciseBody.id;
+
     const { body: workoutBody } = await post("/workouts").send(CREATE_WORKOUT_DTO_1);
     WORKOUT_ID = workoutBody.id;
 
-    const { body: progressionBody } = await post(`/workouts/${WORKOUT_ID}/progressions`);
-    PROGRESSION_ID = progressionBody.id;
+    const { body: progressionBody } = await post(`/workouts/${WORKOUT_ID}/progressions`).send({
+      ...CREATE_PROGRESSION_DTO_1,
+      activities: [{ ...CREATE_ACTIVITY_DTO_1, exerciseId: EXERCISE_ID }],
+    });
 
-    const { body: exerciseBody } = await post(`/exercises`).send(CREATE_EXERCISE_DTO_1);
-    EXERCISE_ID = exerciseBody.id;
+    PROGRESSION_ID = progressionBody.id;
   });
 
   afterEach(async () => {
@@ -51,6 +56,7 @@ describe("ActivitiesController (e2e)", () => {
       const expectedFields = ["id", "sets", "reps", "progressionId", "exerciseId"];
 
       const { post } = authRequest(api, authToken);
+
       const { body, statusCode } = await post(`/workouts/${WORKOUT_ID}/progressions/${PROGRESSION_ID}/activities`).send({
         ...CREATE_ACTIVITY_DTO_1,
         exerciseId: EXERCISE_ID,
@@ -292,17 +298,7 @@ describe("ActivitiesController (e2e)", () => {
       const { body, statusCode } = await get(`/workouts/${WORKOUT_ID}/progressions/${PROGRESSION_ID}/activities`);
 
       expect(statusCode).toBe(200);
-      expect(body).toHaveLength(3);
-    });
-
-    it("should return 200 OK and get an empty array of activities", async () => {
-      const { post, get } = authRequest(api, authToken);
-      const { body: progression } = await post(`/workouts/${WORKOUT_ID}/progressions`);
-
-      const { body, statusCode } = await get(`/workouts/${WORKOUT_ID}/progressions/${progression.id}/activities`);
-
-      expect(statusCode).toBe(200);
-      expect(body).toHaveLength(0);
+      expect(body).toHaveLength(4);
     });
 
     it("should return 400 BAD REQUEST if workoutId is not a number", async () => {

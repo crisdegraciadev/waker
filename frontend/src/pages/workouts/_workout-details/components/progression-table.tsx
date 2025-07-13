@@ -1,6 +1,6 @@
 import { Badge } from "@/core/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/core/components/ui/table";
-import { EXERCISE_TYPES, EXERCISE_TYPES_LABELS, type ExerciseType } from "@/core/types/exercises/exercise-type.type";
+import { EXERCISE_TYPES_LABELS, type ExerciseType } from "@/core/types/exercises/exercise-type.type";
 import { TrendingUp } from "lucide-react";
 
 const invoices = [

@@ -49,7 +49,7 @@ export class ExercisesService {
     const typeFilters = type?.map((t) => ({ type: t })) ?? [];
 
     const facetedFilters: ExerciseWhere = {
-      OR: [...difficultyFilters, ...typeFilters],
+      AND: [...difficultyFilters, ...typeFilters],
     };
 
     const where: ExerciseWhere = {

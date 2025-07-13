@@ -1,7 +1,10 @@
-import { IsArray, IsNotEmpty } from "class-validator";
+import { OmitType, PartialType } from "@nestjs/mapped-types";
+import { IsArray, IsNotEmpty, IsOptional } from "class-validator";
+import { CreateProgressionDto } from "./create-progression.dto";
 
-export class UpdateProgressionDto {
+export class UpdateProgressionDto extends PartialType(OmitType(CreateProgressionDto, ["activities"] as const)) {
   @IsNotEmpty()
   @IsArray()
-  activitiesOrder: number[];
+  @IsOptional()
+  activitiesOrder?: number[];
 }

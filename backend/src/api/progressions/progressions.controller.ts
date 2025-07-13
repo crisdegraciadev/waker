@@ -5,15 +5,33 @@ import { JwtAuthGuard } from "../auth/guards/jwt.guard";
 import { ProgressionsService } from "./progressions.service";
 import { SortProgressionDto } from "./dto/sort-progression.dto";
 import { UpdateProgressionDto } from "./dto/update-progression.dto";
+import { CreateProgressionDto } from "./dto/create-progression.dto";
+import { ActivitiesService } from "../activities/activities.service";
 
 @Controller("workouts/:workoutId/progressions")
 @UseGuards(JwtAuthGuard)
 export class ProgressionsController {
-  constructor(private readonly progressionsService: ProgressionsService) { }
+  constructor(
+    private readonly progressionsService: ProgressionsService,
+    private readonly activitiesService: ActivitiesService,
+  ) {}
 
   @Post()
-  create(@Param("workoutId", ParseIntPipe) workoutId: number, @GetUser("id") userId: number) {
-    return this.progressionsService.create(workoutId, userId);
+  async create(
+    @Body() createProgressionDto: CreateProgressionDto,
+    @Param("workoutId", ParseIntPipe) workoutId: number,
+    @GetUser("id") userId: number,
+  ) {
+    const { id: progressionId } = await this.progressionsService.create(createProgressionDto, workoutId, userId);
+    const { activities } = createProgressionDto;
+
+    const createdActivities = await Promise.all(
+      activities.map(async (activity) => await this.activitiesService.create(activity, workoutId, progressionId, userId)),
+    );
+
+    const activitiesOrder = createdActivities.map(({ id }) => id);
+
+    return this.progressionsService.update(progressionId, workoutId, userId, { activitiesOrder });
   }
 
   @Get()

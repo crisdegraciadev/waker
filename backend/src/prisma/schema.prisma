@@ -86,7 +86,7 @@ model Activity {
   improvement   ActivityImprovement?
   exercise      Exercise             @relation(fields: [exerciseId], references: [id])
   exerciseId    Int
-  progression   Progression          @relation(fields: [progressionId], references: [id])
+  progression   Progression          @relation(fields: [progressionId], references: [id], onDelete: Cascade)
   progressionId Int
 }
 

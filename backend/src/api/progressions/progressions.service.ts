@@ -6,10 +6,11 @@ import { SortOrder } from "~/components/utils/types";
 import { DatabaseService } from "~/shared/services/database.service";
 import { EntityVerifierService } from "~/shared/services/entity-verifier.service";
 import { PaginationService } from "~/shared/services/pagination.service";
+import { CreateProgressionDto } from "./dto/create-progression.dto";
 import { SortProgressionDto } from "./dto/sort-progression.dto";
+import { UpdateProgressionDto } from "./dto/update-progression.dto";
 import { ProgressionWhere } from "./entities/progression-where.type";
 import { ProgressionEntity } from "./entities/progression.entity";
-import { UpdateProgressionDto } from "./dto/update-progression.dto";
 
 @Injectable()
 export class ProgressionsService {
@@ -17,13 +18,15 @@ export class ProgressionsService {
     private db: DatabaseService,
     private paginationService: PaginationService,
     private entityVerifier: EntityVerifierService,
-  ) { }
+  ) {}
 
-  async create(workoutId: number, userId: number) {
+  async create(createProgressionDto: CreateProgressionDto, workoutId: number, userId: number) {
     await this.workoutExistsGuard(workoutId, userId);
 
+    const { createdAt } = createProgressionDto;
+
     const progression = await this.db.progression.create({
-      data: { workoutId, activitiesOrder: [] },
+      data: { workoutId, createdAt, activitiesOrder: [] },
     });
 
     return new ProgressionEntity(progression);
@@ -61,17 +64,19 @@ export class ProgressionsService {
     await this.workoutExistsGuard(workoutId, userId);
     await this.progressionExistsGuard(id, workoutId);
 
-    const { activitiesOrder } = updateProgressionDto;
+    const { activitiesOrder, createdAt } = updateProgressionDto;
 
-    const activities = await this.db.activity.findMany({});
+    const activities = await this.db.activity.findMany({
+      where: { progressionId: id },
+    });
 
-    if (activities.length !== activitiesOrder.length) {
+    if (activitiesOrder?.length !== activities.length) {
       throw new BadRequestException("activities length missmatch");
     }
 
     const progression = await this.db.progression.update({
       where: { id, workoutId },
-      data: { activitiesOrder },
+      data: { activitiesOrder, createdAt },
     });
 
     return new ProgressionEntity(progression);
